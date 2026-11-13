@@ -1,0 +1,6 @@
+{
+  "name": "AtlasForge Sports Nutrition",
+  "description": "High-performance sports nutrition storefront featuring Protéine Musculaire 250g, real-time 3D product visualization, and spaceseller.ma fulfillment integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
