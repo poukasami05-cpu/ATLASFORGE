@@ -32,9 +32,25 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <li>
                 <button
                   onClick={() => onNavigate('product')}
-                  className="hover:text-[#1E4D2B] transition-colors"
+                  className="hover:text-[#1E4D2B] transition-colors cursor-pointer"
                 >
                   Protéine Musculaire 250g
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('collagen')}
+                  className="hover:text-[#1E4D2B] transition-colors cursor-pointer"
+                >
+                  Collagen Marine 250g
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('megamass')}
+                  className="hover:text-[#1E4D2B] transition-colors cursor-pointer"
+                >
+                  Mega Mass 125g
                 </button>
               </li>
               <li>

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { CheckCircle2, Truck, Package, ShieldCheck, ExternalLink, Leaf } from 'lucide-react';
+import { CheckCircle2, Truck, Package, ExternalLink, Leaf } from 'lucide-react';
 import { Order } from '../types';
+import { getProductDisplayMeta } from '../data/mockData';
 import confetti from 'canvas-confetti';
 
 interface OrderSuccessModalProps {
@@ -39,12 +40,10 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
             <div className="w-20 h-20 rounded-2xl bg-white border border-slate-200 p-1.5 shadow-sm mx-auto flex items-center justify-center">
               <img
                 src={
-                  order.items.some((it) => it.productId === 'atlas-collagen-250') &&
-                  !order.items.some((it) => it.productId === 'atlas-protein-250')
-                    ? '/assets/aistudio/Gemini_Generated_Image_kd9pffkd9pffkd9p_2bc27242.jpg'
-                    : '/assets/aistudio/image_789e9c1a.png'
+                  order.items[0]?.imageFallback ||
+                  getProductDisplayMeta(order.items[0]?.productId || 'atlas-protein-250').image
                 }
-                alt="AtlasForge 250g"
+                alt="AtlasForge"
                 className="w-full h-full object-contain"
                 referrerPolicy="no-referrer"
               />
@@ -61,7 +60,7 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
             Commande #{order.id} Confirmée !
           </h2>
           <p className="text-xs text-slate-600 mt-1 max-w-sm mx-auto font-sans-body">
-            Merci <strong className="text-slate-900 font-bold">{order.customer.fullName}</strong>. Votre flacon 250g officiel est en cours de préparation au Hub de Bouskoura.
+            Merci <strong className="text-slate-900 font-bold">{order.customer.fullName}</strong>. Votre commande officielle AtlasForge est en cours de préparation au Hub de Bouskoura.
           </p>
         </div>
 

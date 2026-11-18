@@ -40,7 +40,7 @@ export const CollagenSection: React.FC<CollagenSectionProps> = ({
   const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
 
   const singlePrice = product.priceMAD; // 299 MAD
-  const duoPrice = 499; // Duo Pack discount (299 + 299 = 598 -> 499 MAD)
+  const duoPrice = 419; // Duo Pack discount (299 + 299 = 598 -> 419 MAD)
 
   const handleAddToCart = () => {
     if (purchaseOption === 'duo' && onAddDuoBundle) {
@@ -344,7 +344,7 @@ export const CollagenSection: React.FC<CollagenSectionProps> = ({
                 }`}
               >
                 <div className="absolute -top-2.5 right-4 bg-gradient-to-r from-amber-600 to-[#1E4D2B] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full font-mono uppercase tracking-wider shadow-xs">
-                  🔥 PACK DUO RECOMMANDÉ (-100 MAD)
+                  🔥 PACK DUO RECOMMANDÉ (-179 MAD)
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -360,12 +360,12 @@ export const CollagenSection: React.FC<CollagenSectionProps> = ({
                       Pack Duo : Protéine (250g) + Collagène (250g)
                     </p>
                     <p className="text-[11px] text-[#1E4D2B] font-semibold font-mono">
-                      Muscles + Articulations & Peau · Livraison Gratuite
+                      Muscles + Articulations & Peau · Offre Pack
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-base font-bold text-[#1E4D2B] font-mono tabular-nums">499 MAD</span>
+                  <span className="text-base font-bold text-[#1E4D2B] font-mono tabular-nums">419 MAD</span>
                   <div className="text-[10px] text-slate-400 line-through">598 MAD</div>
                 </div>
               </div>
@@ -472,7 +472,7 @@ export const CollagenSection: React.FC<CollagenSectionProps> = ({
               >
                 <span>
                   {purchaseOption === 'duo'
-                    ? 'Commander le Pack Duo · 499 MAD (COD)'
+                    ? 'Commander le Pack Duo · 419 MAD (COD)'
                     : `Commander Collagen Marine · ${singlePrice * quantity} MAD (COD)`}
                 </span>
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />

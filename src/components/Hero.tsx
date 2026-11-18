@@ -6,6 +6,7 @@ interface HeroProps {
   onOpenSpaceseller: () => void;
   onOpenOrderModal: () => void;
   onExploreCollagen?: () => void;
+  onExploreMegaMass?: () => void;
 }
 
 export const Hero: React.FC<HeroProps> = ({
@@ -13,6 +14,7 @@ export const Hero: React.FC<HeroProps> = ({
   onOpenSpaceseller,
   onOpenOrderModal,
   onExploreCollagen,
+  onExploreMegaMass,
 }) => {
   return (
     <section className="relative pt-12 pb-16 md:pt-18 md:pb-24 bg-[#FAFAFA] overflow-hidden">
@@ -30,14 +32,22 @@ export const Hero: React.FC<HeroProps> = ({
                 <span>BIO-INSPIRED SPORTS NUTRITION</span>
               </span>
               <span aria-hidden="true" className="text-slate-300">·</span>
-              <span>2 PRODUITS SIGNATURES 250G</span>
+              <span>3 PRODUITS SIGNATURES</span>
+              {onExploreMegaMass && (
+                <button
+                  onClick={onExploreMegaMass}
+                  className="bg-emerald-100/80 hover:bg-emerald-200 text-[#1E4D2B] px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
+                >
+                  <Sparkles className="w-3 h-3 text-[#1E4D2B]" />
+                  <span>Nouveau : Mega Mass (Prise de Masse)</span>
+                </button>
+              )}
               {onExploreCollagen && (
                 <button
                   onClick={onExploreCollagen}
-                  className="bg-emerald-100/80 hover:bg-emerald-200 text-[#1E4D2B] px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-colors flex items-center gap-1 shadow-2xs"
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-colors flex items-center gap-1 cursor-pointer"
                 >
-                  <Sparkles className="w-3 h-3 text-[#1E4D2B]" />
-                  <span>Nouveau : Collagen Marine 250g</span>
+                  <span>Collagen Marine 250g</span>
                 </button>
               )}
             </div>

@@ -47,8 +47,24 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <span>Collagen Marine 250g</span>
+          </button>
+          <button
+            onClick={() => onNavigate('megamass')}
+            className={`flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 hover:text-[#1E4D2B] ${
+              activeSection === 'megamass' ? 'text-[#1E4D2B] font-bold underline underline-offset-4' : ''
+            }`}
+          >
+            <span>Mega Mass</span>
+          </button>
+          <button
+            onClick={() => onNavigate('pack-duo')}
+            className={`flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 hover:text-[#1E4D2B] ${
+              activeSection === 'pack-duo' ? 'text-[#1E4D2B] font-bold underline underline-offset-4' : ''
+            }`}
+          >
+            <span>Pack Duo</span>
             <span className="text-[10px] bg-[#1E4D2B] text-white px-1.5 py-0.2 rounded-full font-mono uppercase">
-              New
+              419 DH
             </span>
           </button>
           <button
@@ -82,16 +98,18 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={onOpenCart}
-            className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-white bg-[#14171A] hover:bg-black rounded-xl transition-all shadow-xs whitespace-nowrap shrink-0"
+            className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-white bg-[#14171A] hover:bg-black rounded-xl transition-all shadow-xs whitespace-nowrap shrink-0 cursor-pointer"
             aria-label="Voir le panier"
           >
             <ShoppingBag className="w-4 h-4 text-emerald-400" />
             <span className="hidden sm:inline">Panier</span>
-            {cartItemCount > 0 && (
-              <span className="bg-[#1E4D2B] text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full tabular-nums">
-                {cartItemCount}
-              </span>
-            )}
+            <span
+              className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-full tabular-nums ${
+                cartItemCount > 0 ? 'bg-[#1E4D2B] text-white' : 'bg-slate-700 text-slate-200'
+              }`}
+            >
+              {cartItemCount}
+            </span>
           </button>
         </div>
       </div>

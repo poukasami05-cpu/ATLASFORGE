@@ -147,7 +147,173 @@ export const COLLAGEN_PRODUCT: Product = {
   ],
 };
 
-export const ALL_PRODUCTS: Product[] = [FLAGSHIP_PRODUCT, COLLAGEN_PRODUCT];
+export const MEGA_MASS_PRODUCT: Product = {
+  id: 'atlas-mega-mass-125',
+  sku: 'AF-MM-125G',
+  name: 'Mega Mass',
+  tagline: 'مكمّل بروتين لزيادة الوزن والكتلة العضلية بشكل طبيعي ومتوازن',
+  weightGrams: 125,
+  weightLabel: '125g',
+  priceMAD: 299,
+  compareAtPriceMAD: 379,
+  spacesellerSku: 'SP-ATLAS-MM125-MASS',
+  totalWarehouseStock: 410,
+  description:
+    'تركيبة متكاملة تجمع بين بروتين مصل الحليب (70%)، كولاجين (15%)، كرياتين (10%)، خلاصة الحلبة (3%)، وفيتامين C (2%) لدعم زيادة الوزن والنمو العضلي بشكل طبيعي ومتوازن. يعزز القوة والطاقة، يدعم المفاصل، ويفتح الشهية بطريقة صحية. خالٍ من السكر المضاف ومحلى طبيعيًا بستيفيا.',
+  scientificFormula:
+    'Whey Protein (70%) + Collagène (15%) + Créatine (10%) + Extrait de Fenugrec (3%) + Vitamine C (2%) + Stevia Naturelle',
+  flavors: [
+    {
+      id: 'megamass-vanille-halba',
+      name: 'Vanille Naturelle & Stevia',
+      tasteProfile: 'نكهات طبيعية خالية من السكر المضاف ومحلى طبيعيًا بستيفيا، سريع الذوبان في الماء أو الحليب',
+      accentColor: '#1E4D2B',
+      accentGlow: 'rgba(30, 77, 43, 0.38)',
+      inStock: true,
+      stockUnits: 230,
+    },
+    {
+      id: 'megamass-chocolat-energie',
+      name: 'Cacao Riche & Stevia',
+      tasteProfile: 'كاكاو طبيعي غني مثالي بعد التمرين أو بين الوجبات مع الحليب كامل الدسم',
+      accentColor: '#14171A',
+      accentGlow: 'rgba(20, 23, 26, 0.35)',
+      inStock: true,
+      stockUnits: 180,
+    },
+  ],
+  nutritionFacts: [
+    { label: 'بروتين مصل الحليب (Whey Protein)', amount: '70.00%', dailyValue: 'بناء العضلات', highlight: true },
+    { label: 'كولاجين (Collagène)', amount: '15.00%', dailyValue: 'المفاصل والبشرة', highlight: true },
+    { label: 'كرياتين (Créatine)', amount: '10.00%', dailyValue: 'القوة والطاقة', highlight: true },
+    { label: 'خلاصة الحلبة (Fenugrec)', amount: '3.00%', dailyValue: 'فتح الشهية', highlight: true },
+    { label: 'فيتامين C', amount: '2.00%', dailyValue: 'المناعة والتعافي', highlight: true },
+    { label: 'المحلي الطبيعي', amount: 'ستيفيا (Stevia)', dailyValue: '0% سكر مضاف', highlight: false },
+    { label: 'النكهات', amount: 'نكهات طبيعية 100%', dailyValue: '-', highlight: false },
+  ],
+  keyBenefits: [
+    {
+      title: 'زيادة الوزن وبناء العضلات (70% Whey)',
+      description: 'يحتوي على بروتين مصل الحليب (70%) الغني بالأحماض الأمينية الأساسية التي تدعم بناء الألياف العضلية وتحفّز النمو بطريقة طبيعية ومتوازنة.',
+      icon: 'Zap',
+    },
+    {
+      title: 'تعزيز القوة والطاقة (10% Créatine)',
+      description: 'يحتوي على الكرياتين (10%) الذي يزيد من القوة البدنية، ويُحسّن الأداء في تمارين المقاومة ورفع الأثقال.',
+      icon: 'Flame',
+    },
+    {
+      title: 'دعم المفاصل والبشرة (15% Collagène)',
+      description: 'يحتوي على الكولاجين (15%) الذي يدعم صحة المفاصل والأنسجة الضامة، ويساعد في تحسين مظهر البشرة ومرونتها.',
+      icon: 'ShieldCheck',
+    },
+    {
+      title: 'فتح الشهية وتحسين الهضم (3% الحلبة)',
+      description: 'تساعد خلاصة الحلبة (3%) على تحفيز الشهية وزيادة تناول السعرات الحرارية، مما يُساهم في اكتساب الوزن بشكل طبيعي.',
+      icon: 'Leaf',
+    },
+  ],
+};
+
+export const PACK_DUO_PRODUCT: Product = {
+  id: 'atlas-pack-duo-500',
+  sku: 'AF-PACK-500G',
+  name: 'Pack Duo Vital Boost & Collagen',
+  tagline: 'Collagen Marine 250g + Vital Boost Protein 250g · Énergie, Muscles & Articulations',
+  weightGrams: 500,
+  weightLabel: '2 × 250g',
+  priceMAD: 419,
+  compareAtPriceMAD: 598,
+  spacesellerSku: 'SP-ATLAS-PACK-DUO',
+  totalWarehouseStock: 260,
+  description:
+    'Le pack synergie complet d’AtlasForge réunissant Vital Boost Protein (250g) pour l’énergie, la récupération et la masse musculaire avec Collagen Marine (250g) pour la santé de la peau, des cheveux, des ongles et des articulations.',
+  scientificFormula:
+    'Vital Boost Whey Isolate (CFM 93%) + Hydrolyzed Marine Collagen Peptides Type I & III (< 2000 Da)',
+  flavors: [
+    {
+      id: 'pack-choco-natural',
+      name: 'Chocolate + Natural',
+      tasteProfile: 'Vital Boost Chocolat + Collagen Marine Naturel sans odeur',
+      accentColor: '#1E4D2B',
+      accentGlow: 'rgba(30, 77, 43, 0.38)',
+      inStock: true,
+      stockUnits: 120,
+    },
+    {
+      id: 'pack-vanilla-lemon',
+      name: 'Vanilla + Lemon',
+      tasteProfile: 'Vital Boost Vanille + Collagen Marine Citron Zeste',
+      accentColor: '#2E7D32',
+      accentGlow: 'rgba(46, 125, 50, 0.35)',
+      inStock: true,
+      stockUnits: 85,
+    },
+    {
+      id: 'pack-caramel-vanilla',
+      name: 'Caramel + Vanilla',
+      tasteProfile: 'Vital Boost Caramel + Collagen Marine Vanille Douce',
+      accentColor: '#14171A',
+      accentGlow: 'rgba(20, 23, 26, 0.35)',
+      inStock: true,
+      stockUnits: 55,
+    },
+  ],
+  nutritionFacts: [
+    { label: 'Vital Boost Protein (250g)', amount: '24.2g / dose', dailyValue: 'Muscles & Énergie', highlight: true },
+    { label: 'Collagen Marine (250g)', amount: '9.8g / dose', dailyValue: 'Peau, Cheveux & Mafasel', highlight: true },
+    { label: 'BCAA Naturels (4:1:1)', amount: '5.6g', dailyValue: 'Performance', highlight: true },
+    { label: 'Sucres Ajoutés', amount: '0.0g', dailyValue: '0%', highlight: false },
+  ],
+  keyBenefits: [
+    {
+      title: 'Muscle Support & More Energy',
+      description: 'Vital Boost Protein alimente la croissance musculaire et améliore la performance physique.',
+      icon: 'Zap',
+    },
+    {
+      title: 'Healthy Skin, Hair & Strong Nails',
+      description: 'Collagen Marine nourrit le derme, fortifie les ongles et redonne vitalité aux cheveux.',
+      icon: 'Sparkles',
+    },
+    {
+      title: 'Strong Joints & Better Performance',
+      description: 'Protège les articulations et accélère la récupération après l’entraînement.',
+      icon: 'ShieldCheck',
+    },
+  ],
+};
+
+export const ALL_PRODUCTS: Product[] = [FLAGSHIP_PRODUCT, COLLAGEN_PRODUCT, MEGA_MASS_PRODUCT, PACK_DUO_PRODUCT];
+
+export const getProductDisplayMeta = (productId: string): { name: string; image: string; defaultWeight: string } => {
+  if (productId === COLLAGEN_PRODUCT.id) {
+    return {
+      name: 'Collagen Marine',
+      image: '/assets/aistudio/Gemini_Generated_Image_kd9pffkd9pffkd9p_2bc27242.jpg',
+      defaultWeight: '250g',
+    };
+  }
+  if (productId === MEGA_MASS_PRODUCT.id) {
+    return {
+      name: 'Mega Mass',
+      image: '/assets/aistudio/Gemini_Generated_Image_1qnusy1qnusy1qnu_0d9ff216.jpg',
+      defaultWeight: '125g',
+    };
+  }
+  if (productId === PACK_DUO_PRODUCT.id) {
+    return {
+      name: 'Pack Duo (Protein + Collagen)',
+      image: '/assets/atlasforge-pack-duo.jpg',
+      defaultWeight: '2 × 250g',
+    };
+  }
+  return {
+    name: 'Protéine Musculaire',
+    image: '/assets/aistudio/image_789e9c1a.png',
+    defaultWeight: '250g',
+  };
+};
 
 export const MOROCCAN_CITIES: MoroccanCity[] = [
   { name: 'Casablanca', region: 'Grand Casablanca', deliveryTimeDays: '24h Express', codAvailable: true },

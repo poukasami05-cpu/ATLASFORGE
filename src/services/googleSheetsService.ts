@@ -7,6 +7,7 @@
 
 import { Order } from '../types';
 import { getAccessToken } from './googleAuthService';
+import { getProductDisplayMeta } from '../data/mockData';
 
 export interface GoogleSheetOrderPayload {
   date: string;
@@ -129,7 +130,7 @@ export const formatOrderForGoogleSheets = (order: Order): GoogleSheetOrderPayloa
   const productsFormatted = order.items
     .map(
       (it) =>
-        `${it.productId === 'atlas-collagen-250' ? 'Collagen Marine' : 'Protéine Musculaire'} (${it.flavorName}) × ${it.quantity}`
+        `${getProductDisplayMeta(it.productId).name} (${it.flavorName}) × ${it.quantity}`
     )
     .join(' + ');
 

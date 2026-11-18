@@ -1,6 +1,7 @@
 import React from 'react';
-import { X, Trash2, ArrowRight, ShieldCheck, Truck, ShoppingBag, Leaf } from 'lucide-react';
+import { X, Trash2, ArrowRight, ShieldCheck, Truck, ShoppingBag } from 'lucide-react';
 import { CartItem } from '../types';
+import { getProductDisplayMeta } from '../data/mockData';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -97,7 +98,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </button>
               </div>
             ) : (
-              items.map((item, idx) => (
+              items.map((item, idx) => {
+                const meta = getProductDisplayMeta(item.productId);
+                return (
                 <div
                   key={`${item.productId}-${item.flavorId}-${idx}`}
                   className="p-3.5 bg-white border border-slate-200 rounded-xl flex gap-3.5 shadow-xs"
@@ -105,13 +108,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   {/* Miniature Product Bottle */}
                   <div className="w-16 h-16 rounded-xl bg-[#FAF9F7] border border-slate-200 flex items-center justify-center shrink-0 p-1 overflow-hidden">
                     <img
-                      src={
-                        item.imageFallback ||
-                        (item.productId === 'atlas-collagen-250'
-                          ? '/assets/aistudio/Gemini_Generated_Image_kd9pffkd9pffkd9p_2bc27242.jpg'
-                          : '/assets/aistudio/image_789e9c1a.png')
-                      }
-                      alt={item.productId === 'atlas-collagen-250' ? 'Collagen Marine 250g' : 'AtlasForge Protéine 250g'}
+                      src={item.imageFallback || meta.image}
+                      alt={`${meta.name} ${item.weightLabel || meta.defaultWeight}`}
                       className="w-full h-full object-contain"
                       referrerPolicy="no-referrer"
                     />
@@ -120,7 +118,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-1 mb-1">
                       <h4 className="text-xs font-bold text-slate-900 truncate font-serif-heading">
-                        {item.productId === 'atlas-collagen-250' ? 'Collagen Marine' : 'Protéine Musculaire'} · {item.flavorName}
+                        {meta.name} · {item.flavorName}
                       </h4>
                       <button
                         onClick={() => onRemoveItem(idx)}
@@ -132,7 +130,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     </div>
 
                     <div className="text-[11px] text-slate-500 mb-2 font-mono">
-                      {item.purchaseType === 'subscription' ? 'Abonnement (-15%)' : 'Achat unique'} · 250g
+                      {item.purchaseType === 'subscription' ? 'Abonnement (-15%)' : 'Achat unique'} · {item.weightLabel || meta.defaultWeight}
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -160,7 +158,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     </div>
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
 

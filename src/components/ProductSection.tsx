@@ -20,6 +20,8 @@ import {
 interface ProductSectionProps {
   proteinProduct: Product;
   collagenProduct: Product;
+  megaMassProduct: Product;
+  packDuoProduct: Product;
   activeFlavor: FlavorOption;
   onFlavorChange: (flavor: FlavorOption) => void;
   onAddToCart: (item: CartItem) => void;
@@ -30,6 +32,8 @@ interface ProductSectionProps {
 export const ProductSection: React.FC<ProductSectionProps> = ({
   proteinProduct,
   collagenProduct,
+  megaMassProduct,
+  packDuoProduct,
   activeFlavor,
   onFlavorChange,
   onAddToCart,
@@ -37,11 +41,16 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   onAddDuoBundle,
 }) => {
   const [collagenFlavor, setCollagenFlavor] = useState<FlavorOption>(collagenProduct.flavors[0]);
+  const [megaMassFlavor, setMegaMassFlavor] = useState<FlavorOption>(megaMassProduct.flavors[0]);
+  const [packFlavor, setPackFlavor] = useState<FlavorOption>(packDuoProduct.flavors[0]);
   const [proteinQty, setProteinQty] = useState<number>(1);
   const [collagenQty, setCollagenQty] = useState<number>(1);
+  const [megaMassQty, setMegaMassQty] = useState<number>(1);
   const [show3dModal, setShow3dModal] = useState<boolean>(false);
   const [proteinAddedNotice, setProteinAddedNotice] = useState<boolean>(false);
   const [collagenAddedNotice, setCollagenAddedNotice] = useState<boolean>(false);
+  const [megaMassAddedNotice, setMegaMassAddedNotice] = useState<boolean>(false);
+  const [packAddedNotice, setPackAddedNotice] = useState<boolean>(false);
 
   const handleAddProtein = () => {
     onAddToCart({
@@ -99,6 +108,62 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     });
   };
 
+  const handleAddMegaMass = () => {
+    onAddToCart({
+      productId: megaMassProduct.id,
+      flavorId: megaMassFlavor.id,
+      flavorName: megaMassFlavor.name,
+      weightLabel: megaMassProduct.weightLabel,
+      priceMAD: megaMassProduct.priceMAD,
+      quantity: megaMassQty,
+      purchaseType: 'one-time',
+      imageFallback: '/assets/aistudio/Gemini_Generated_Image_1qnusy1qnusy1qnu_0d9ff216.jpg',
+    });
+    setMegaMassAddedNotice(true);
+    setTimeout(() => setMegaMassAddedNotice(false), 2200);
+  };
+
+  const handleQuickBuyMegaMass = () => {
+    onQuickCheckout({
+      productId: megaMassProduct.id,
+      flavorId: megaMassFlavor.id,
+      flavorName: megaMassFlavor.name,
+      weightLabel: megaMassProduct.weightLabel,
+      priceMAD: megaMassProduct.priceMAD,
+      quantity: megaMassQty,
+      purchaseType: 'one-time',
+      imageFallback: '/assets/aistudio/Gemini_Generated_Image_1qnusy1qnusy1qnu_0d9ff216.jpg',
+    });
+  };
+
+  const handleAddPackDuo = () => {
+    onAddToCart({
+      productId: packDuoProduct.id,
+      flavorId: packFlavor.id,
+      flavorName: packFlavor.name,
+      weightLabel: packDuoProduct.weightLabel,
+      priceMAD: packDuoProduct.priceMAD,
+      quantity: 1,
+      purchaseType: 'one-time',
+      imageFallback: '/assets/atlasforge-pack-duo.jpg',
+    });
+    setPackAddedNotice(true);
+    setTimeout(() => setPackAddedNotice(false), 2200);
+  };
+
+  const handleQuickBuyPackDuo = () => {
+    onQuickCheckout({
+      productId: packDuoProduct.id,
+      flavorId: packFlavor.id,
+      flavorName: packFlavor.name,
+      weightLabel: packDuoProduct.weightLabel,
+      priceMAD: packDuoProduct.priceMAD,
+      quantity: 1,
+      purchaseType: 'one-time',
+      imageFallback: '/assets/atlasforge-pack-duo.jpg',
+    });
+  };
+
   return (
     <section id="product" className="py-16 md:py-24 bg-[#F5F5F7] border-t border-slate-200/90 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -110,10 +175,10 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               <span>CATALOGUE OFFICIEL ATLASFORGE · NUTRITION BIO ATHLÉTIQUE 250G</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#14171A] font-serif-heading">
-              Les Deux Piliers de l'Athlète
+              Catalogue Officiel &amp; Pack Duo
             </h2>
             <p className="text-sm sm:text-base text-slate-600 font-sans-body mt-2 max-w-2xl">
-              Une synergie exclusive développée pour les exigences physiques intenses : reconstruire les fibres musculaires avec l'isolat CFM natif et protéger les articulations avec le collagène marin hydrolysé.
+              Une gamme bio-athlétique complète : Protéine Musculaire (Isolat CFM), Collagen Marine, Mega Mass (5-en-1) et notre Pack Duo Vital Boost &amp; Collagen à 419 MAD.
             </p>
           </div>
           <div className="text-xs text-slate-500 font-mono flex items-center gap-2 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-2xs">
@@ -166,7 +231,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
           </div>
         </div>
 
-        {/* 2. Professional Side-by-Side Dual Product Showcase Cards */}
+        {/* 2. Professional Side-by-Side 2x2 Catalog Grid (3 Products + Pack Duo) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch mb-12">
           {/* PRODUCT 1: Protéine Musculaire (250g · Flacon Noir) */}
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative overflow-hidden group">
@@ -404,6 +469,241 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               </div>
             </div>
           </div>
+
+          {/* PRODUCT 3: Mega Mass (125g · Prise de Masse & Force) */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative overflow-hidden group">
+            {/* Top Accent Pill */}
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <span className="bg-[#1E4D2B] text-white text-[11px] font-mono font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-300" />
+                <span>NOUVEAU MASS & FORCE · {megaMassProduct.weightLabel}</span>
+              </span>
+              <div className="flex items-center gap-1 text-[11px] font-mono text-emerald-900 bg-emerald-50 px-2.5 py-0.5 rounded-full font-bold border border-emerald-200">
+                <Zap className="w-3 h-3 text-[#1E4D2B]" />
+                <span>Whey 70% + Créatine 10%</span>
+              </div>
+            </div>
+
+            {/* Product Title */}
+            <div>
+              <h3 className="text-2xl sm:text-3xl font-bold text-[#14171A] font-serif-heading">
+                AtlasForge {megaMassProduct.name}
+              </h3>
+              <p dir="rtl" className="text-xs sm:text-sm text-slate-600 font-sans mt-1 text-right">
+                مكمّل بروتين لزيادة الوزن والكتلة العضلية : 70% واي، 15% كولاجين، 10% كرياتين، 3% حلبة، 2% فيتامين C (ستيفيا 0% سكر).
+              </p>
+            </div>
+
+            {/* Packshot Image Container */}
+            <div className="relative w-full aspect-square max-h-[320px] my-5 flex items-center justify-center bg-gradient-to-b from-[#FAF9F7] via-[#F4F6F4] to-[#ECEFE9] rounded-2xl p-4 border border-slate-100 overflow-hidden">
+              <img
+                src="/assets/aistudio/Gemini_Generated_Image_1qnusy1qnusy1qnu_0d9ff216.jpg"
+                alt="AtlasForge Mega Mass - مكمّل بروتين لزيادة الوزن والكتلة العضلية"
+                className="max-h-full max-w-[85%] object-contain drop-shadow-xl transition-transform duration-500 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <a
+                href="#megamass"
+                className="absolute bottom-3 left-3 bg-white/95 hover:bg-white text-slate-800 hover:text-[#1E4D2B] text-[10px] font-mono font-bold px-2.5 py-1 rounded-xl border border-slate-200 shadow-2xs transition-colors"
+              >
+                <span>✦ Détails & Composition %</span>
+              </a>
+            </div>
+
+            {/* 3 Key Benefits */}
+            <div className="grid grid-cols-3 gap-2 py-3 border-y border-slate-100 text-center font-mono">
+              <div className="p-2 bg-slate-50 rounded-xl">
+                <span className="block text-xs font-bold text-slate-900">70%</span>
+                <span className="text-[10px] text-slate-500">Whey Protéine</span>
+              </div>
+              <div className="p-2 bg-slate-50 rounded-xl">
+                <span className="block text-xs font-bold text-slate-900">10% + 15%</span>
+                <span className="text-[10px] text-slate-500">Créatine + Collagène</span>
+              </div>
+              <div className="p-2 bg-slate-50 rounded-xl">
+                <span className="block text-xs font-bold text-[#1E4D2B]">3% + 2%</span>
+                <span className="text-[10px] text-slate-500">Hliba + Vit C</span>
+              </div>
+            </div>
+
+            {/* Flavor Selector */}
+            <div className="my-4">
+              <label className="block text-[11px] font-bold text-slate-700 uppercase font-mono tracking-wider mb-2">
+                Saveur Mega Mass :
+              </label>
+              <div className="grid grid-cols-2 gap-1.5">
+                {megaMassProduct.flavors.map((flavor) => {
+                  const isSelected = flavor.id === megaMassFlavor.id;
+                  return (
+                    <button
+                      key={flavor.id}
+                      type="button"
+                      onClick={() => setMegaMassFlavor(flavor)}
+                      className={`px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all truncate text-center cursor-pointer ${
+                        isSelected
+                          ? 'border-[#1E4D2B] bg-[#1E4D2B] text-white shadow-xs'
+                          : 'border-slate-200 text-slate-700 bg-slate-50 hover:bg-slate-100'
+                      }`}
+                    >
+                      {flavor.name.split(' &')[0]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Pricing & Actions */}
+            <div className="pt-2 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-2xl font-extrabold text-[#14171A] font-mono tabular-nums">
+                    {megaMassProduct.priceMAD} MAD
+                  </span>
+                  <span className="text-xs text-slate-400 line-through font-mono ml-2">
+                    {megaMassProduct.compareAtPriceMAD} MAD
+                  </span>
+                </div>
+                <span className="text-[11px] font-mono font-bold text-[#1E4D2B] bg-[#1E4D2B]/10 px-2.5 py-0.5 rounded-full">
+                  Paiement Cash (COD)
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={handleQuickBuyMegaMass}
+                  className="py-3 px-4 bg-[#1E4D2B] hover:bg-[#163a20] text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-[#1E4D2B]/20 flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>Commander Mass</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAddMegaMass}
+                  className="py-3 px-4 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Package className="w-3.5 h-3.5 text-[#1E4D2B]" />
+                  <span>{megaMassAddedNotice ? '✓ Ajouté !' : 'Ajouter au Panier'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* PRODUCT 4: PACK DUO (Collagen Marine 250g + Vital Boost Protein 250g - Background Removed) */}
+          <div id="pack-duo" className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-[#1E4D2B]/30 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative overflow-hidden group">
+            {/* Top Accent Pill */}
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <span className="bg-gradient-to-r from-[#14171A] to-[#1E4D2B] text-white text-[11px] font-mono font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-2xs">
+                <Flame className="w-3 h-3 text-amber-400" />
+                <span>PACK DUO OFFICIEL · -179 MAD</span>
+              </span>
+              <div className="flex items-center gap-1 text-[11px] font-mono text-emerald-900 bg-emerald-50 px-2.5 py-0.5 rounded-full font-bold border border-emerald-200">
+                <Sparkles className="w-3 h-3 text-[#1E4D2B]" />
+                <span>2 × 250g Synergie</span>
+              </div>
+            </div>
+
+            {/* Product Title */}
+            <div>
+              <h3 className="text-2xl sm:text-3xl font-bold text-[#14171A] font-serif-heading">
+                {packDuoProduct.name}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 font-sans mt-1">
+                Collagen Marine 250g (peau, cheveux, ongles & articulations) + Vital Boost Protein 250g (énergie, muscles & performance).
+              </p>
+            </div>
+
+            {/* Clean Isolated Studio Cutout Image (Background Removed) */}
+            <div className="relative w-full aspect-square max-h-[320px] my-5 flex items-center justify-center bg-white rounded-2xl p-4 border border-slate-100 overflow-hidden">
+              <img
+                src="/assets/atlasforge-pack-duo.jpg"
+                alt="Pack Duo AtlasForge Collagen Marine et Vital Boost Protein sans arrière-plan"
+                className="max-h-full max-w-[94%] object-contain transition-transform duration-500 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute top-3 left-3 bg-[#1E4D2B] text-white text-[10px] font-mono font-bold px-2.5 py-1 rounded-full shadow-xs">
+                ÉCONOMISEZ 179 MAD
+              </div>
+            </div>
+
+            {/* 3 Key Benefits */}
+            <div className="grid grid-cols-3 gap-2 py-3 border-y border-slate-100 text-center font-mono">
+              <div className="p-2 bg-slate-50 rounded-xl">
+                <span className="block text-xs font-bold text-slate-900">2 × 250g</span>
+                <span className="text-[10px] text-slate-500">Pack Complet</span>
+              </div>
+              <div className="p-2 bg-slate-50 rounded-xl">
+                <span className="block text-xs font-bold text-slate-900">Muscles + Peau</span>
+                <span className="text-[10px] text-slate-500">&amp; Articulations</span>
+              </div>
+              <div className="p-2 bg-slate-50 rounded-xl">
+                <span className="block text-xs font-bold text-[#1E4D2B]">419 MAD</span>
+                <span className="text-[10px] text-slate-500">Au lieu de 598</span>
+              </div>
+            </div>
+
+            {/* Pack Flavor Combination Selector */}
+            <div className="my-4">
+              <label className="block text-[11px] font-bold text-slate-700 uppercase font-mono tracking-wider mb-2">
+                Saveurs du Pack (Protéine + Collagène) :
+              </label>
+              <div className="grid grid-cols-3 gap-1.5">
+                {packDuoProduct.flavors.map((flavor) => {
+                  const isSelected = flavor.id === packFlavor.id;
+                  return (
+                    <button
+                      key={flavor.id}
+                      type="button"
+                      onClick={() => setPackFlavor(flavor)}
+                      className={`px-2 py-1.5 rounded-xl border text-[11px] font-semibold transition-all truncate text-center cursor-pointer ${
+                        isSelected
+                          ? 'border-[#1E4D2B] bg-[#1E4D2B] text-white shadow-xs'
+                          : 'border-slate-200 text-slate-700 bg-slate-50 hover:bg-slate-100'
+                      }`}
+                    >
+                      {flavor.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Pricing & Actions */}
+            <div className="pt-2 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-2xl font-extrabold text-[#1E4D2B] font-mono tabular-nums">
+                    {packDuoProduct.priceMAD} MAD
+                  </span>
+                  <span className="text-xs text-slate-400 line-through font-mono ml-2">
+                    {packDuoProduct.compareAtPriceMAD} MAD
+                  </span>
+                </div>
+                <span className="text-[11px] font-mono font-bold text-[#1E4D2B] bg-[#1E4D2B]/10 px-2.5 py-0.5 rounded-full">
+                  Paiement Cash (COD)
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={handleQuickBuyPackDuo}
+                  className="py-3 px-4 bg-[#1E4D2B] hover:bg-[#163a20] text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-[#1E4D2B]/20 flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>Commander le Pack</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAddPackDuo}
+                  className="py-3 px-4 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Package className="w-3.5 h-3.5 text-[#1E4D2B]" />
+                  <span>{packAddedNotice ? '✓ Ajouté !' : 'Ajouter au Panier'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* 3. The Power of the Duo Pack (Synergy Box) */}
@@ -415,29 +715,29 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             <div className="space-y-2 text-center lg:text-left max-w-2xl">
               <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-800">
                 <Flame className="w-3.5 h-3.5 text-amber-400" />
-                <span>OFFRE PACK DUO RECOMMANDÉ (-100 MAD + LIVRAISON GRATUITE)</span>
+                <span>OFFRE PACK DUO RECOMMANDÉ (-179 MAD)</span>
               </span>
               <h3 className="text-2xl sm:text-3xl font-bold font-serif-heading">
-                Pack Duo Performance & Beauté (Protéine + Collagène)
+                Pack Duo Vital Boost & Collagen (Protéine + Collagène)
               </h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
-                Pourquoi choisir ? La Protéine Musculaire bâtit la masse musculaire tandis que le Collagen Marine fortifie les articulations, ligaments et tendons. Zéro compromis physique.
+                Pourquoi choisir ? Vital Boost Protein bâtit la masse musculaire et booste l’énergie tandis que Collagen Marine fortifie peau, ongles, cheveux et articulations.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 shrink-0">
               <div className="text-center sm:text-right">
                 <div className="text-3xl font-extrabold text-white font-mono tabular-nums">
-                  499 MAD
+                  419 MAD
                 </div>
                 <div className="text-xs text-slate-400 line-through font-mono">
-                  598 MAD · Économisez 100 MAD
+                  598 MAD · Économisez 179 MAD
                 </div>
               </div>
 
               <button
                 type="button"
-                onClick={onAddDuoBundle}
+                onClick={handleQuickBuyPackDuo}
                 className="px-6 py-4 bg-gradient-to-r from-emerald-600 to-[#1E4D2B] hover:from-emerald-500 hover:to-[#163a20] text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-emerald-900/40 flex items-center gap-2 cursor-pointer whitespace-nowrap"
               >
                 <span>Commander le Pack Duo</span>

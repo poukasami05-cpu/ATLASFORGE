@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, ShieldCheck, Truck, CheckCircle2, DollarSign, Lock, Leaf, Sparkles, FileSpreadsheet } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CartItem, CustomerDetails, MoroccanCity, Order, PaymentMethod } from '../types';
-import { MOROCCAN_CITIES } from '../data/mockData';
+import { MOROCCAN_CITIES, getProductDisplayMeta } from '../data/mockData';
 import { syncOrderToGoogleSheets } from '../services/googleSheetsService';
 
 interface CheckoutModalProps {
@@ -146,7 +146,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <span>COMMANDE SÉCURISÉE · SPACESELLER.MA</span>
                   </div>
                   <h2 className="text-xl sm:text-2xl font-bold text-[#14171A] font-serif-heading mt-0.5">
-                    Commander AtlasForge 250g
+                    Commander AtlasForge
                   </h2>
                 </div>
                 <button
@@ -190,7 +190,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     Produit(s) commandé(s) :
                   </span>
                   <div className="flex flex-col gap-2 p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-                    {items.map((it, i) => (
+                    {items.map((it, i) => {
+                      const meta = getProductDisplayMeta(it.productId);
+                      return (
                       <div
                         key={i}
                         className="flex items-center justify-between gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 text-xs shadow-2xs"
@@ -198,22 +200,17 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div className="w-9 h-9 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center p-0.5 shrink-0">
                             <img
-                              src={
-                                it.imageFallback ||
-                                (it.productId === 'atlas-collagen-250'
-                                  ? '/assets/aistudio/Gemini_Generated_Image_kd9pffkd9pffkd9p_2bc27242.jpg'
-                                  : '/assets/aistudio/image_789e9c1a.png')
-                              }
-                              alt={it.flavorName}
+                              src={it.imageFallback || meta.image}
+                              alt={`${meta.name} - ${it.flavorName}`}
                               className="w-full h-full object-contain"
                             />
                           </div>
                           <div className="min-w-0">
                             <p className="font-bold text-slate-900 truncate font-serif-heading">
-                              {it.productId === 'atlas-collagen-250' ? 'Collagen Marine' : 'Protéine Musculaire'}
+                              {meta.name}
                             </p>
                             <p className="text-[10px] text-slate-500 font-mono">
-                              250g · {it.flavorName} (×{it.quantity})
+                              {it.weightLabel || meta.defaultWeight} · {it.flavorName} (×{it.quantity})
                             </p>
                           </div>
                         </div>
@@ -221,7 +218,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                           {it.priceMAD * it.quantity} MAD
                         </span>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 

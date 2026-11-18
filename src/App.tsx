@@ -17,23 +17,14 @@ import { OrderSuccessModal } from './components/OrderSuccessModal';
 import { StickyBuyBar } from './components/StickyBuyBar';
 import { Footer } from './components/Footer';
 import { CollagenSection } from './components/CollagenSection';
-import { FLAGSHIP_PRODUCT, COLLAGEN_PRODUCT } from './data/mockData';
+import { MegaMassSection } from './components/MegaMassSection';
+import { FLAGSHIP_PRODUCT, COLLAGEN_PRODUCT, MEGA_MASS_PRODUCT, PACK_DUO_PRODUCT } from './data/mockData';
 import { CartItem, FlavorOption, Order } from './types';
 import { Leaf } from 'lucide-react';
 
 export default function App() {
   const [activeFlavor, setActiveFlavor] = useState<FlavorOption>(FLAGSHIP_PRODUCT.flavors[0]);
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      productId: FLAGSHIP_PRODUCT.id,
-      flavorId: FLAGSHIP_PRODUCT.flavors[0].id,
-      flavorName: FLAGSHIP_PRODUCT.flavors[0].name,
-      weightLabel: '250g',
-      priceMAD: FLAGSHIP_PRODUCT.priceMAD,
-      quantity: 1,
-      purchaseType: 'one-time',
-    },
-  ]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
   const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
@@ -88,27 +79,17 @@ export default function App() {
   };
 
   const handleAddDuoBundle = () => {
-    const proteinItem: CartItem = {
-      productId: FLAGSHIP_PRODUCT.id,
-      flavorId: activeFlavor.id,
-      flavorName: activeFlavor.name,
-      weightLabel: '250g',
-      priceMAD: 250,
+    const packItem: CartItem = {
+      productId: PACK_DUO_PRODUCT.id,
+      flavorId: PACK_DUO_PRODUCT.flavors[0].id,
+      flavorName: PACK_DUO_PRODUCT.flavors[0].name,
+      weightLabel: PACK_DUO_PRODUCT.weightLabel,
+      priceMAD: PACK_DUO_PRODUCT.priceMAD,
       quantity: 1,
       purchaseType: 'one-time',
-      imageFallback: '/assets/aistudio/image_789e9c1a.png',
+      imageFallback: '/assets/atlasforge-pack-duo.jpg',
     };
-    const collagenItem: CartItem = {
-      productId: COLLAGEN_PRODUCT.id,
-      flavorId: COLLAGEN_PRODUCT.flavors[0].id,
-      flavorName: COLLAGEN_PRODUCT.flavors[0].name,
-      weightLabel: '250g',
-      priceMAD: 249,
-      quantity: 1,
-      purchaseType: 'one-time',
-      imageFallback: '/assets/aistudio/Gemini_Generated_Image_kd9pffkd9pffkd9p_2bc27242.jpg',
-    };
-    setCartItems([proteinItem, collagenItem]);
+    setCartItems([packItem]);
     setIsCartOpen(false);
     setIsCheckoutOpen(true);
   };
@@ -131,7 +112,7 @@ export default function App() {
       <div className="bg-[#1E4D2B] text-white py-2 px-4 text-center text-xs font-medium flex items-center justify-center gap-1.5 font-sans-body">
         <Leaf className="w-3.5 h-3.5" />
         <span>
-          <strong>AtlasForge Bio-Luxe :</strong> Protéine Musculaire & Collagen Marine 250g · Expédition 24h via <strong>spaceseller.ma</strong> (Paiement à la livraison)
+          <strong>AtlasForge Bio-Luxe :</strong> Protéine Musculaire, Collagen Marine & Mega Mass · Expédition 24h via <strong>spaceseller.ma</strong> (Paiement à la livraison)
         </span>
       </div>
 
@@ -151,12 +132,15 @@ export default function App() {
           onOpenSpaceseller={() => handleNavigate('spaceseller')}
           onOpenOrderModal={() => setIsCheckoutOpen(true)}
           onExploreCollagen={() => handleNavigate('collagen')}
+          onExploreMegaMass={() => handleNavigate('megamass')}
         />
 
-        {/* 2. Flagship Dual Product Section (Side-by-Side with Athlete Context) */}
+        {/* 2. Flagship Triple Product Section (Side-by-Side with Athlete Context) */}
         <ProductSection
           proteinProduct={FLAGSHIP_PRODUCT}
           collagenProduct={COLLAGEN_PRODUCT}
+          megaMassProduct={MEGA_MASS_PRODUCT}
+          packDuoProduct={PACK_DUO_PRODUCT}
           activeFlavor={activeFlavor}
           onFlavorChange={setActiveFlavor}
           onAddToCart={handleAddToCart}
@@ -164,12 +148,19 @@ export default function App() {
           onAddDuoBundle={handleAddDuoBundle}
         />
 
-        {/* 3. Dedicated Collagen Marine Section (Nouveau Produit 250g) */}
+        {/* 3. Dedicated Collagen Marine Section */}
         <CollagenSection
           product={COLLAGEN_PRODUCT}
           onAddToCart={handleAddToCart}
           onQuickCheckout={handleQuickCheckout}
           onAddDuoBundle={handleAddDuoBundle}
+        />
+
+        {/* 3b. Dedicated Mega Mass Section (Prise de Masse & Force) */}
+        <MegaMassSection
+          product={MEGA_MASS_PRODUCT}
+          onAddToCart={handleAddToCart}
+          onQuickCheckout={handleQuickCheckout}
         />
 
         {/* 4. Brand Story: Bio & Pure Sports Nutrition */}
