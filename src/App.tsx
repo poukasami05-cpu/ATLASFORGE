@@ -126,11 +126,22 @@ export default function App() {
 
       {/* Main Content */}
       <main className="flex-1">
-        {/* 1. Hero Campaign */}
+        {/* 1. Hero Campaign (Mega Mass Flagship) */}
         <Hero
           onExploreProduct={() => handleNavigate('product')}
           onOpenSpaceseller={() => handleNavigate('spaceseller')}
-          onOpenOrderModal={() => setIsCheckoutOpen(true)}
+          onOpenOrderModal={() =>
+            handleQuickCheckout({
+              productId: MEGA_MASS_PRODUCT.id,
+              flavorId: MEGA_MASS_PRODUCT.flavors[0].id,
+              flavorName: MEGA_MASS_PRODUCT.flavors[0].name,
+              weightLabel: MEGA_MASS_PRODUCT.weightLabel,
+              priceMAD: MEGA_MASS_PRODUCT.priceMAD,
+              quantity: 1,
+              purchaseType: 'one-time',
+              imageFallback: '/assets/aistudio/914166009_992279166760564_2026284814750205857_n_e33294fe.png',
+            })
+          }
           onExploreCollagen={() => handleNavigate('collagen')}
           onExploreMegaMass={() => handleNavigate('megamass')}
         />

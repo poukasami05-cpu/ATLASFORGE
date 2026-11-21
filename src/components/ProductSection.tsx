@@ -117,7 +117,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       priceMAD: megaMassProduct.priceMAD,
       quantity: megaMassQty,
       purchaseType: 'one-time',
-      imageFallback: '/assets/aistudio/Gemini_Generated_Image_1qnusy1qnusy1qnu_0d9ff216.jpg',
+      imageFallback: '/assets/aistudio/914166009_992279166760564_2026284814750205857_n_e33294fe.png',
     });
     setMegaMassAddedNotice(true);
     setTimeout(() => setMegaMassAddedNotice(false), 2200);
@@ -132,7 +132,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       priceMAD: megaMassProduct.priceMAD,
       quantity: megaMassQty,
       purchaseType: 'one-time',
-      imageFallback: '/assets/aistudio/Gemini_Generated_Image_1qnusy1qnusy1qnu_0d9ff216.jpg',
+      imageFallback: '/assets/aistudio/914166009_992279166760564_2026284814750205857_n_e33294fe.png',
     });
   };
 
@@ -495,10 +495,10 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
             </div>
 
             {/* Packshot Image Container */}
-            <div className="relative w-full aspect-square max-h-[320px] my-5 flex items-center justify-center bg-gradient-to-b from-[#FAF9F7] via-[#F4F6F4] to-[#ECEFE9] rounded-2xl p-4 border border-slate-100 overflow-hidden">
+            <div className="relative w-full aspect-square max-h-[320px] my-5 flex items-center justify-center bg-white rounded-2xl p-4 border border-slate-100 overflow-hidden">
               <img
-                src="/assets/aistudio/Gemini_Generated_Image_1qnusy1qnusy1qnu_0d9ff216.jpg"
-                alt="AtlasForge Mega Mass - مكمّل بروتين لزيادة الوزن والكتلة العضلية"
+                src="/assets/aistudio/914166009_992279166760564_2026284814750205857_n_e33294fe.png"
+                alt="AtlasForge Mega Mass 250g - مكمّل بروتين لزيادة الوزن والكتلة العضلية"
                 className="max-h-full max-w-[85%] object-contain drop-shadow-xl transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer"
               />

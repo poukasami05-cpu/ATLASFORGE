@@ -55,7 +55,7 @@ export const MegaMassSection: React.FC<MegaMassSectionProps> = ({
       priceMAD: unitPrice,
       quantity,
       purchaseType: 'one-time',
-      imageFallback: '/assets/aistudio/Gemini_Generated_Image_1qnusy1qnusy1qnu_0d9ff216.jpg',
+      imageFallback: '/assets/aistudio/914166009_992279166760564_2026284814750205857_n_e33294fe.png',
     });
     setAddedNotice(true);
     setTimeout(() => setAddedNotice(false), 2400);
@@ -70,7 +70,7 @@ export const MegaMassSection: React.FC<MegaMassSectionProps> = ({
       priceMAD: unitPrice,
       quantity,
       purchaseType: 'one-time',
-      imageFallback: '/assets/aistudio/Gemini_Generated_Image_1qnusy1qnusy1qnu_0d9ff216.jpg',
+      imageFallback: '/assets/aistudio/914166009_992279166760564_2026284814750205857_n_e33294fe.png',
     });
   };
 
@@ -134,8 +134,8 @@ export const MegaMassSection: React.FC<MegaMassSectionProps> = ({
 
               {/* Official Product Jar Image */}
               <img
-                src="/assets/aistudio/Gemini_Generated_Image_1qnusy1qnusy1qnu_0d9ff216.jpg"
-                alt="AtlasForge Mega Mass - مكمّل بروتين لزيادة الوزن والكتلة العضلية"
+                src="/assets/aistudio/914166009_992279166760564_2026284814750205857_n_e33294fe.png"
+                alt="AtlasForge Mega Mass 250g - مكمّل بروتين لزيادة الوزن والكتلة العضلية"
                 className="max-h-[88%] max-w-[90%] object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.16)] transition-transform duration-500 ease-out group-hover:scale-105"
                 referrerPolicy="no-referrer"
               />

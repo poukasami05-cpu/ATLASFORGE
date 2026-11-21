@@ -50,7 +50,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   onClick={() => onNavigate('megamass')}
                   className="hover:text-[#1E4D2B] transition-colors cursor-pointer"
                 >
-                  Mega Mass 125g
+                  Mega Mass 250g
                 </button>
               </li>
               <li>

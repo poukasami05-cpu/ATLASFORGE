@@ -149,14 +149,14 @@ export const COLLAGEN_PRODUCT: Product = {
 
 export const MEGA_MASS_PRODUCT: Product = {
   id: 'atlas-mega-mass-125',
-  sku: 'AF-MM-125G',
+  sku: 'AF-MM-250G',
   name: 'Mega Mass',
   tagline: 'مكمّل بروتين لزيادة الوزن والكتلة العضلية بشكل طبيعي ومتوازن',
-  weightGrams: 125,
-  weightLabel: '125g',
+  weightGrams: 250,
+  weightLabel: '250g',
   priceMAD: 299,
   compareAtPriceMAD: 379,
-  spacesellerSku: 'SP-ATLAS-MM125-MASS',
+  spacesellerSku: 'SP-ATLAS-MM250-MASS',
   totalWarehouseStock: 410,
   description:
     'تركيبة متكاملة تجمع بين بروتين مصل الحليب (70%)، كولاجين (15%)، كرياتين (10%)، خلاصة الحلبة (3%)، وفيتامين C (2%) لدعم زيادة الوزن والنمو العضلي بشكل طبيعي ومتوازن. يعزز القوة والطاقة، يدعم المفاصل، ويفتح الشهية بطريقة صحية. خالٍ من السكر المضاف ومحلى طبيعيًا بستيفيا.',
@@ -297,8 +297,8 @@ export const getProductDisplayMeta = (productId: string): { name: string; image:
   if (productId === MEGA_MASS_PRODUCT.id) {
     return {
       name: 'Mega Mass',
-      image: '/assets/aistudio/Gemini_Generated_Image_1qnusy1qnusy1qnu_0d9ff216.jpg',
-      defaultWeight: '125g',
+      image: '/assets/aistudio/914166009_992279166760564_2026284814750205857_n_e33294fe.png',
+      defaultWeight: '250g',
     };
   }
   if (productId === PACK_DUO_PRODUCT.id) {
