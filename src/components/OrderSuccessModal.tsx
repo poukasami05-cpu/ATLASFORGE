@@ -1,17 +1,20 @@
 import React, { useEffect } from 'react';
-import { CheckCircle2, Truck, Package, ExternalLink, Leaf } from 'lucide-react';
+import { CheckCircle2, Truck, Package, ExternalLink, Leaf, FileSpreadsheet, AlertTriangle } from 'lucide-react';
+import { SyncResult } from '../services/googleSheetsService';
 import { Order } from '../types';
 import { getProductDisplayMeta } from '../data/mockData';
 import confetti from 'canvas-confetti';
 
 interface OrderSuccessModalProps {
   order: Order | null;
+  sync?: SyncResult | null;
   onClose: () => void;
   onOpenSpacesellerHub: () => void;
 }
 
 export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
   order,
+  sync,
   onClose,
   onOpenSpacesellerHub,
 }) => {
@@ -84,6 +87,50 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
               <span className="text-[#1E4D2B] font-bold">{order.totalMAD} MAD (Espèces)</span>
             </div>
           </div>
+
+          {/* Statut réel Google Sheets */}
+          {sync && (
+            <div
+              className={`p-3 rounded-xl border flex items-start gap-2.5 ${
+                sync.success
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                  : 'bg-amber-50 border-amber-300 text-amber-900'
+              }`}
+            >
+              {sync.success ? (
+                <FileSpreadsheet className="w-4 h-4 shrink-0 mt-0.5 text-[#1E4D2B]" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+              )}
+              <div className="space-y-1">
+                <p className="font-bold text-[11px]">
+                  {sync.success
+                    ? sync.confirmed
+                      ? '✓ Ajoutée dans Google Sheets'
+                      : '✓ Envoyée à Google Sheets (non confirmée)'
+                    : '⏳ En attente de synchronisation Google Sheets'}
+                </p>
+                <p className="text-[10px] opacity-80">{sync.message}</p>
+                {!sync.success && sync.reason && (
+                  <p className="text-[10px] opacity-80">
+                    <strong>Raison :</strong> {sync.reason}
+                  </p>
+                )}
+                {!sync.success && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onOpenSpacesellerHub();
+                    }}
+                    className="mt-1 text-[10px] font-bold underline text-amber-900 cursor-pointer"
+                  >
+                    Ouvrir l’espace Google Sheets →
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Delivery Process steps */}
           <div className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-2">

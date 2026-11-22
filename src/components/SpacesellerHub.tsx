@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Server,
   CheckCircle2,
@@ -40,6 +40,13 @@ import {
   appendPayloadsToGoogleSheet,
   formatOrderForGoogleSheets,
   markLocalLogsSynced,
+  ORDERS_UPDATED_EVENT,
+  getGoogleSheetsWebhookUrl,
+  setGoogleSheetsWebhookUrl,
+  getBuiltInWebhookUrl,
+  isValidAppsScriptUrl,
+  postToWebhook,
+  pingWebhook,
   SpreadsheetMetadata,
   GoogleSheetOrderPayload,
 } from '../services/googleSheetsService';
@@ -82,6 +89,18 @@ export const SpacesellerHub: React.FC = () => {
   // Explicit Confirmation Modal for Mutating Operations
   const [pendingMutation, setPendingMutation] = useState<PendingMutation | null>(null);
   const [isMutating, setIsMutating] = useState<boolean>(false);
+
+  // Webhook 24h/24 (Google Apps Script)
+  const [webhookInput, setWebhookInput] = useState<string>(() => getGoogleSheetsWebhookUrl());
+  const [webhookBusy, setWebhookBusy] = useState<boolean>(false);
+  const [webhookFeedback, setWebhookFeedback] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const builtInWebhook = getBuiltInWebhookUrl();
+  const activeWebhook = getGoogleSheetsWebhookUrl();
+  const [bannerBusy, setBannerBusy] = useState<boolean>(false);
+
+  // Always-fresh refs for the auto-refresh listener
+  const sheetRef = useRef<{ id: string; tab: string } | null>(null);
+  sheetRef.current = metadata && selectedSheetTitle ? { id: metadata.spreadsheetId, tab: selectedSheetTitle } : null;
 
   const loadSpreadsheetData = useCallback(async (token: string, idOrUrl: string, preferredTab?: string) => {
     setSheetsLoading(true);
@@ -137,6 +156,33 @@ export const SpacesellerHub: React.FC = () => {
   useEffect(() => {
     setLocalLogs(getSyncedSheetLogs());
   }, [activeTab]);
+
+  // Auto-refresh: dès qu'une commande est validée (ou synchronisée), on recharge
+  // la file locale + l'aperçu Google Sheet, sans actualiser la page.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const refresh = () => {
+      setLocalLogs(getSyncedSheetLogs());
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        const token = getAccessToken();
+        const target = sheetRef.current;
+        if (token && target) {
+          readSheetRows(token, target.id, target.tab).then(setSheetRows).catch(() => {});
+        }
+      }, 1200); // laisser le temps à Apps Script d'écrire la ligne
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (!e.key || e.key.startsWith('atlasforge_')) refresh();
+    };
+    window.addEventListener(ORDERS_UPDATED_EVENT, refresh);
+    window.addEventListener('storage', onStorage); // autre onglet du même navigateur
+    return () => {
+      window.removeEventListener(ORDERS_UPDATED_EVENT, refresh);
+      window.removeEventListener('storage', onStorage);
+      if (timer) clearTimeout(timer);
+    };
+  }, []);
 
   const handleGoogleLogin = async () => {
     setIsLoggingIn(true);
@@ -276,6 +322,83 @@ export const SpacesellerHub: React.FC = () => {
 
   const pendingOrders = localLogs.filter((l) => l.status !== 'synced_google_sheet' && l.payload);
 
+  const handleSaveWebhook = () => {
+    const url = webhookInput.trim();
+    if (url && !isValidAppsScriptUrl(url)) {
+      setWebhookFeedback({
+        type: 'error',
+        text: 'URL invalide. Elle doit ressembler à https://script.google.com/macros/s/…/exec',
+      });
+      return;
+    }
+    setGoogleSheetsWebhookUrl(url);
+    setWebhookFeedback({
+      type: 'info',
+      text: url
+        ? 'URL enregistrée pour CE navigateur. Pour tous les clients, collez-la aussi dans src/services/googleSheetsService.ts puis redéployez.'
+        : 'URL supprimée pour ce navigateur.',
+    });
+  };
+
+  const handleTestWebhook = async () => {
+    const url = webhookInput.trim();
+    if (!isValidAppsScriptUrl(url)) {
+      setWebhookFeedback({ type: 'error', text: 'Collez d’abord une URL Apps Script valide (…/exec).' });
+      return;
+    }
+    setWebhookBusy(true);
+    setWebhookFeedback(null);
+    try {
+      const res = await pingWebhook(url);
+      setWebhookFeedback({
+        type: 'success',
+        text: `✓ Webhook OK : Apps Script répond et écrira dans l’onglet « ${res.sheet || '1er onglet'} ». (Aucune ligne ajoutée pendant le test.)`,
+      });
+    } catch (err: any) {
+      setWebhookFeedback({ type: 'error', text: `✗ ${err?.message || 'Échec du test.'}` });
+    } finally {
+      setWebhookBusy(false);
+    }
+  };
+
+  // Bannière : synchroniser la file locale (Webhook si dispo, sinon API Google)
+  const handleSyncNow = async () => {
+    if (pendingOrders.length === 0) return;
+    const payloads = pendingOrders.map((l) => l.payload as GoogleSheetOrderPayload);
+    const orderIds = pendingOrders.map((l) => l.orderId as string);
+
+    if (activeWebhook) {
+      setBannerBusy(true);
+      setSheetsFeedback(null);
+      try {
+        const res = await postToWebhook(activeWebhook, payloads);
+        markLocalLogsSynced(orderIds);
+        setSheetsFeedback({
+          type: 'success',
+          text: res.confirmed
+            ? `${res.added ?? payloads.length} commande(s) envoyée(s) via le Webhook Apps Script (doublons ignorés).`
+            : `${payloads.length} commande(s) envoyée(s) au Webhook (vérifiez le Sheet).`,
+        });
+        return;
+      } catch (err: any) {
+        setSheetsFeedback({ type: 'error', text: `Webhook : ${err?.message || 'échec'}. Essai via la connexion Google…` });
+      } finally {
+        setBannerBusy(false);
+      }
+    }
+
+    if (needsAuth || !getAccessToken()) {
+      setAuthError('Connectez-vous avec Google pour synchroniser les commandes en attente.');
+      await handleGoogleLogin();
+      return;
+    }
+    if (!metadata || !selectedSheetTitle) {
+      setSheetsFeedback({ type: 'error', text: 'Chargez ou créez d’abord un Google Sheet, puis cliquez à nouveau sur « Synchroniser maintenant ».' });
+      return;
+    }
+    setPendingMutation({ type: 'sync_pending', payloads, orderIds });
+  };
+
   return (
     <section id="spaceseller" className="py-20 bg-[#F4F5F7] border-t border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -334,6 +457,32 @@ export const SpacesellerHub: React.FC = () => {
         {/* TAB 1: GOOGLE SHEETS DIRECT CONNECTION */}
         {activeTab === 'googlesheets' && (
           <div className="space-y-6 animate-fade-in">
+            {/* Bannière commandes en attente */}
+            {pendingOrders.length > 0 && (
+              <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-start gap-2.5">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="text-xs text-amber-900">
+                    <p className="font-bold">
+                      {pendingOrders.length} commande(s) en attente de synchronisation Google Sheets
+                    </p>
+                    <p className="text-[11px] opacity-80">
+                      {pendingOrders[0]?.error || 'Ces commandes sont stockées uniquement dans ce navigateur.'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  disabled={bannerBusy || isLoggingIn}
+                  onClick={handleSyncNow}
+                  className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
+                >
+                  <UploadCloud className="w-3.5 h-3.5" />
+                  <span>{bannerBusy ? 'Synchronisation…' : 'Synchroniser maintenant'}</span>
+                </button>
+              </div>
+            )}
+
             {/* Account Connection Card */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-5">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -608,6 +757,79 @@ export const SpacesellerHub: React.FC = () => {
               )}
             </div>
 
+            {/* Envoi Automatique 24h/24 (Webhook Apps Script) */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900 font-serif-heading">
+                    Envoi Automatique 24h/24 (Webhook Google Apps Script)
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    Obligatoire pour que les commandes de <strong>tous les clients</strong> arrivent dans votre Sheet, même quand vous êtes déconnecté.
+                  </p>
+                </div>
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${
+                    builtInWebhook
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      : activeWebhook
+                      ? 'bg-amber-50 text-amber-800 border-amber-200'
+                      : 'bg-rose-50 text-rose-700 border-rose-200'
+                  }`}
+                >
+                  {builtInWebhook ? '● Actif pour tous les clients' : activeWebhook ? '● Actif sur ce navigateur seulement' : '● Non configuré'}
+                </span>
+              </div>
+
+              <div className="flex flex-col lg:flex-row gap-2">
+                <input
+                  type="url"
+                  placeholder="https://script.google.com/macros/s/…/exec"
+                  value={webhookInput}
+                  onChange={(e) => setWebhookInput(e.target.value)}
+                  className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:border-[#1E4D2B] focus:bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={handleSaveWebhook}
+                  className="px-4 py-2.5 bg-[#14171A] hover:bg-black text-white font-bold text-xs rounded-xl cursor-pointer"
+                >
+                  Enregistrer
+                </button>
+                <button
+                  type="button"
+                  disabled={webhookBusy}
+                  onClick={handleTestWebhook}
+                  className="px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-[#1E4D2B] border border-emerald-300 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  <Play className="w-3.5 h-3.5" />
+                  <span>{webhookBusy ? 'Test…' : 'Tester l’envoi'}</span>
+                </button>
+              </div>
+
+              {webhookFeedback && (
+                <div
+                  className={`p-3 rounded-xl text-xs font-semibold border ${
+                    webhookFeedback.type === 'success'
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                      : webhookFeedback.type === 'error'
+                      ? 'bg-rose-50 border-rose-200 text-rose-800'
+                      : 'bg-sky-50 border-sky-200 text-sky-900'
+                  }`}
+                >
+                  {webhookFeedback.text}
+                </div>
+              )}
+
+              {!builtInWebhook && (
+                <p className="text-[11px] text-slate-500">
+                  Code à copier : <code className="font-mono">google-apps-script/Code.gs</code> · Guide :{' '}
+                  <code className="font-mono">GUIDE-WEBHOOK.md</code> · Ensuite collez l’URL dans{' '}
+                  <code className="font-mono">src/services/googleSheetsService.ts</code>.
+                </p>
+              )}
+            </div>
+
             {/* Live Rows from Google Sheets (if connected) */}
             {!needsAuth && metadata && (
               <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
@@ -718,7 +940,10 @@ export const SpacesellerHub: React.FC = () => {
                                 ✓ Synchronisée
                               </span>
                             ) : (
-                              <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                              <span
+                                title={log.error || ''}
+                                className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200"
+                              >
                                 En attente de sync
                               </span>
                             )}
@@ -1018,6 +1243,9 @@ export const SpacesellerHub: React.FC = () => {
                     Voulez-vous ajouter cette ligne test dans l’onglet{' '}
                     <strong className="text-slate-900">« {selectedSheetTitle} »</strong> du document{' '}
                     <strong className="text-slate-900">« {metadata?.title} »</strong> ?
+                  </p>
+                  <p className="p-2 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 font-semibold">
+                    ⚠️ Si ce Sheet est lié à Spaceseller, cette ligne test peut créer un vrai colis. Supprimez-la juste après.
                   </p>
                   <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] space-y-0.5">
                     <p><strong>N° Commande :</strong> {pendingMutation.payload.orderId}</p>

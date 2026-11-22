@@ -20,6 +20,7 @@ import { CollagenSection } from './components/CollagenSection';
 import { MegaMassSection } from './components/MegaMassSection';
 import { FLAGSHIP_PRODUCT, COLLAGEN_PRODUCT, MEGA_MASS_PRODUCT, PACK_DUO_PRODUCT } from './data/mockData';
 import { CartItem, FlavorOption, Order } from './types';
+import { SyncResult } from './services/googleSheetsService';
 import { Leaf } from 'lucide-react';
 
 export default function App() {
@@ -28,6 +29,7 @@ export default function App() {
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
   const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
+  const [orderSync, setOrderSync] = useState<SyncResult | null>(null);
   const [activeSection, setActiveSection] = useState<string>('home');
 
   const handleNavigate = (sectionId: string) => {
@@ -99,8 +101,9 @@ export default function App() {
     setIsCheckoutOpen(true);
   };
 
-  const handleOrderPlaced = (order: Order) => {
+  const handleOrderPlaced = (order: Order, sync: SyncResult | null) => {
     setConfirmedOrder(order);
+    setOrderSync(sync);
     setCartItems([]);
   };
 
@@ -231,7 +234,11 @@ export default function App() {
 
       <OrderSuccessModal
         order={confirmedOrder}
-        onClose={() => setConfirmedOrder(null)}
+        sync={orderSync}
+        onClose={() => {
+          setConfirmedOrder(null);
+          setOrderSync(null);
+        }}
         onOpenSpacesellerHub={() => handleNavigate('spaceseller')}
       />
     </div>

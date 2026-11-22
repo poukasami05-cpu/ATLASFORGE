@@ -3,13 +3,13 @@ import { X, ShieldCheck, Truck, CheckCircle2, DollarSign, Lock, Leaf, Sparkles, 
 import { motion, AnimatePresence } from 'motion/react';
 import { CartItem, CustomerDetails, MoroccanCity, Order, PaymentMethod } from '../types';
 import { MOROCCAN_CITIES, getProductDisplayMeta } from '../data/mockData';
-import { syncOrderToGoogleSheets } from '../services/googleSheetsService';
+import { syncOrderToGoogleSheets, SyncResult } from '../services/googleSheetsService';
 
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   items: CartItem[];
-  onOrderPlaced: (order: Order) => void;
+  onOrderPlaced: (order: Order, sync: SyncResult | null) => void;
 }
 
 export const CheckoutModal: React.FC<CheckoutModalProps> = ({
@@ -95,16 +95,21 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       createdAt: new Date().toISOString(),
     };
 
-    // Synchronisation en direct vers Google Sheets Web App
+    // Synchronisation vers Google Sheets (Webhook 24h/24 → API directe → file locale)
+    let syncResult: SyncResult | null = null;
     try {
-      await syncOrderToGoogleSheets(newOrder);
+      syncResult = await syncOrderToGoogleSheets(newOrder);
+      if (!syncResult.success) {
+        newOrder.spacesellerSyncStatus = 'pending';
+      }
     } catch (syncErr) {
       console.warn('Sync notice:', syncErr);
+      newOrder.spacesellerSyncStatus = 'failed';
     }
 
     setTimeout(() => {
       setIsSubmitting(false);
-      onOrderPlaced(newOrder);
+      onOrderPlaced(newOrder, syncResult);
       onClose();
     }, 450);
   };
