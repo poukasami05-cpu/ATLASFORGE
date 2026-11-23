@@ -85,7 +85,8 @@ export default function App() {
   const handleOrderPlaced = (order: Order, sync: SyncResult | null) => {
     setConfirmedOrder(order);
     setOrderSync(sync);
-    setCartItems([]);
+    // Si la commande n'a pas pu être envoyée, on garde le panier pour que le client réessaie
+    if (!sync || sync.success) setCartItems([]);
   };
 
   const totalCartCount = cartItems.reduce((acc, it) => acc + it.quantity, 0);
