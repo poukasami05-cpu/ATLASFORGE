@@ -22,13 +22,14 @@ export const SPACESELLER_SKU_MAP: Record<string, string | string[]> = {
   'atlas-protein-250': 'pro-testo250g', // Protéine Musculaire 250g
   'atlas-collagen-250': 'collagen-prodre', // Collagen Marine 250g
   'atlas-mega-mass-125': 'gainpro250g', // Mega Mass 250g
-  // Pack Duo = 2 produits → 2 lignes (le prix total va sur la 1ère ligne)
-  'atlas-pack-duo-500': ['pro-testo250g', 'collagen-prodre'],
+  // Pack Duo = pack Spaceseller « My Packs » (1 seule ligne, 1 seul colis)
+  'atlas-pack-duo-500': 'pack-pack-duo-vital-boost-&-collagen',
   // Gamme Santé (nouveaux produits)
   'atlas-zinc': 'zinc-picolinate', // Zinc
   'atlas-fer-vitc': 'fer30', // Fer + Vitamine C
   'atlas-magnesium-gummies': 'gumies_magnesieum', // Magnésium Complex Gummies
-  'atlas-pack-sante': ['zinc-picolinate', 'fer30', 'gumies_magnesieum'], // Pack Santé Complet 199 DH
+  // Pack Santé = pack Spaceseller « My Packs » (1 seule ligne, 1 seul colis)
+  'atlas-pack-sante': 'pack-pack-santé-complet', // Pack Santé Complet 199 DH
 };
 
 // ============================================================================

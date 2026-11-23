@@ -4,8 +4,8 @@
  * (gardé sous le nom Hero.tsx pour ne pas avoir à créer de nouveau fichier).
  */
 
-import React, { useState } from 'react';
-import { ArrowRight, ShoppingBag, MapPin, Check, ChevronRight, Plus } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ArrowRight, ShoppingBag, MapPin, Check, ChevronRight, Plus, Minus, X, Eye, Truck, ShieldCheck, Info } from 'lucide-react';
 import {
   FLAGSHIP_PRODUCT,
   COLLAGEN_PRODUCT,
@@ -19,11 +19,31 @@ import { CartItem, Product } from '../types';
 // ---------------------------------------------------------------------------
 // Images (fond gris des photos → blanc avec brightness, puis "multiply" sur la carte)
 // ---------------------------------------------------------------------------
-const IMG = {
-  protein: { src: '/assets/aistudio/bazili_c898db13.png', filter: 'brightness(1.12)' },
-  collagen: { src: '/assets/aistudio/Gemini_Generated_Image_kd9pffkd9pffkd9p_2bc27242.jpg', filter: 'brightness(1.18)' },
-  megamass: { src: '/assets/aistudio/914166009_992279166760564_2026284814750205857_n_e33294fe.png', filter: 'brightness(1.03)' },
+// zoom = grossir la photo pour que tous les pots aient la même taille à l'écran
+// fit  = 'cover' quand la photo est très large (Collagen)
+interface Pic {
+  src: string;
+  filter: string;
+  zoom?: number;
+  fit?: 'contain' | 'cover';
+}
+const IMG: Record<'protein' | 'collagen' | 'megamass' | 'packDuo', Pic> = {
+  protein: { src: '/assets/aistudio/bazili_c898db13.png', filter: 'brightness(1.12)', zoom: 1.12 },
+  collagen: { src: '/assets/aistudio/Gemini_Generated_Image_kd9pffkd9pffkd9p_2bc27242.jpg', filter: 'brightness(1.18)', fit: 'cover', zoom: 0.92 },
+  megamass: { src: '/assets/aistudio/914166009_992279166760564_2026284814750205857_n_e33294fe.png', filter: 'brightness(1.03)', zoom: 1.3 },
   packDuo: { src: '/assets/atlasforge-pack-duo.jpg', filter: 'none' },
+};
+
+/** Style d'une photo produit dans une boîte (taille de base en %) */
+const picStyle = (pic: Pic, base: number): React.CSSProperties => {
+  const size = `${Math.round(base * (pic.zoom ?? 1))}%`;
+  return {
+    width: size,
+    height: size,
+    maxWidth: 'none',
+    objectFit: pic.fit ?? 'contain',
+    filter: pic.filter === 'none' ? undefined : pic.filter,
+  };
 };
 
 const ACCENT = '#B9F26B';
@@ -44,6 +64,377 @@ const makeItem = (p: Product, flavorIndex = 0, imageFallback?: string): CartItem
   purchaseType: 'one-time',
   imageFallback,
 });
+
+// ---------------------------------------------------------------------------
+// Fiches produits en arabe (fenêtre « détails »)
+// ---------------------------------------------------------------------------
+interface ArabicInfo {
+  nameAr: string;
+  subtitle: string;
+  description: string;
+  forWho: string;
+  benefits: { title: string; text: string }[];
+  table?: { label: string; value: string }[];
+  tableTitle?: string;
+  contents?: string[];
+  flavorsAr?: Record<string, string>;
+  format: string;
+}
+
+const AR_INFO: Record<string, ArabicInfo> = {
+  [FLAGSHIP_PRODUCT.id]: {
+    nameAr: 'بروتين العضلات',
+    subtitle: 'بروتين واي معزول عالي النقاء · 250 غ',
+    description:
+      'بروتين واي معزول عالي النقاء لبناء العضلات وتسريع الاستشفاء بعد التمرين. مُصفّى على البارد، بدون سكر مضاف، يذوب بسرعة وسهل الهضم.',
+    forWho: 'للرياضيين ورواد قاعات الرياضة اللي بغاو يبنيو العضلات ويرتاحو بسرعة من بعد التمرين.',
+    benefits: [
+      { title: 'بناء العضلات', text: 'غني بالأحماض الأمينية BCAA بنسبة 4:1:1 والليوسين لدعم نمو الألياف العضلية.' },
+      { title: 'استشفاء أسرع', text: 'يحتوي على L-Glutamine اللي كيساعد الجسم يرتاح من بعد التمارين الصعبة.' },
+      { title: 'سهل الهضم', text: 'نسبة اللاكتوز ضعيفة بزاف (أقل من 0.2%)، بلا نفخة.' },
+      { title: 'بدون سكر مضاف', text: '0 غ سكر مضاف في كل جرعة.' },
+    ],
+    tableTitle: 'القيمة الغذائية (لكل جرعة)',
+    table: [
+      { label: 'بروتين', value: '24.2 غ' },
+      { label: 'BCAA (4:1:1)', value: '5.6 غ' },
+      { label: 'L-Glutamine', value: '4.4 غ' },
+      { label: 'السعرات الحرارية', value: '108 kcal' },
+      { label: 'الكربوهيدرات', value: '0.6 غ' },
+      { label: 'سكر مضاف', value: '0 غ' },
+      { label: 'الدهون', value: '0.4 غ' },
+      { label: 'الصوديوم', value: '110 mg' },
+    ],
+    flavorsAr: { 'chocolat-intense': 'شوكولاتة', 'vanille-bourbon': 'فانيلا', 'matcha-energie': 'ماتشا بالنعناع' },
+    format: 'علبة 250 غ',
+  },
+  [COLLAGEN_PRODUCT.id]: {
+    nameAr: 'كولاجين بحري',
+    subtitle: 'كولاجين بحري متحلل نوع I و III · 250 غ',
+    description:
+      'كولاجين بحري متحلل (نوع I و III) مع الزنك وفيتامين C، لصحة البشرة والشعر والأظافر والمفاصل. بلا طعم ولا ريحة، كيذوب في الماء ولا القهوة ولا الشيك.',
+    forWho: 'للي بغا يعتني بالبشرة والشعر والأظافر، وللرياضيين اللي بغاو يحميو المفاصل.',
+    benefits: [
+      { title: 'المفاصل', text: 'كيدعم صحة المفاصل والأوتار، خصوصا عند الرياضيين.' },
+      { title: 'البشرة', text: 'كيساعد على ترطيب البشرة ومرونتها.' },
+      { title: 'الشعر والأظافر', text: 'كيقوي الأظافر وكيغذي الشعر.' },
+      { title: 'امتصاص سريع', text: 'ببتيدات صغيرة (أقل من 2000 دالتون) سهلة الهضم.' },
+    ],
+    tableTitle: 'القيمة الغذائية (لكل جرعة)',
+    table: [
+      { label: 'كولاجين بحري متحلل', value: '9.8 غ' },
+      { label: 'بروتين', value: '9.2 غ' },
+      { label: 'غليسين، برولين وهيدروكسي برولين', value: '4.8 غ' },
+      { label: 'فيتامين C', value: '80 mg' },
+      { label: 'الزنك', value: '10 mg' },
+      { label: 'السكر', value: '0 غ' },
+      { label: 'الدهون', value: '0 غ' },
+      { label: 'السعرات الحرارية', value: '38 kcal' },
+    ],
+    flavorsAr: { 'collagen-neutre': 'بلا نكهة', 'collagen-citron-vitc': 'ليمون وفيتامين C' },
+    format: 'علبة 250 غ',
+  },
+  [MEGA_MASS_PRODUCT.id]: {
+    nameAr: 'ميغا ماس',
+    subtitle: 'بروتين لزيادة الوزن والكتلة العضلية · 250 غ',
+    description:
+      'تركيبة متكاملة كتجمع بين بروتين مصل الحليب (70%)، الكولاجين (15%)، الكرياتين (10%)، خلاصة الحلبة (3%) وفيتامين C (2%) لدعم زيادة الوزن والنمو العضلي بشكل طبيعي. بدون سكر مضاف ومحلى بالستيفيا.',
+    forWho: 'للي بغا يزيد في الوزن ويبني الكتلة العضلية، ولا عندو مشكل في الشهية.',
+    benefits: [
+      { title: 'زيادة الوزن والعضلات', text: '70% بروتين مصل الحليب الغني بالأحماض الأمينية الأساسية.' },
+      { title: 'القوة والطاقة', text: '10% كرياتين لتحسين الأداء في تمارين المقاومة ورفع الأثقال.' },
+      { title: 'المفاصل والبشرة', text: '15% كولاجين لدعم المفاصل والأنسجة.' },
+      { title: 'فتح الشهية', text: '3% خلاصة الحلبة كتساعد على فتح الشهية بطريقة طبيعية.' },
+    ],
+    tableTitle: 'التركيبة',
+    table: [
+      { label: 'بروتين مصل الحليب (Whey)', value: '70%' },
+      { label: 'كولاجين', value: '15%' },
+      { label: 'كرياتين', value: '10%' },
+      { label: 'خلاصة الحلبة', value: '3%' },
+      { label: 'فيتامين C', value: '2%' },
+      { label: 'المحلي', value: 'ستيفيا طبيعية' },
+      { label: 'سكر مضاف', value: '0%' },
+    ],
+    flavorsAr: { 'megamass-vanille-halba': 'فانيلا', 'megamass-chocolat-energie': 'كاكاو' },
+    format: 'علبة 250 غ',
+  },
+  [PACK_DUO_PRODUCT.id]: {
+    nameAr: 'باك ديو',
+    subtitle: 'بروتين + كولاجين · 2 × 250 غ',
+    description:
+      'باك كيجمع Vital Boost Protein (250 غ) للطاقة والعضلات والاستشفاء، مع Collagen Marine (250 غ) لصحة البشرة والشعر والأظافر والمفاصل. جوج منتوجات في طلبية وحدة، وكتوفر 179 درهم.',
+    forWho: 'للي بغا العضلات والمفاصل في نفس الوقت، بثمن أرخص من شراء كل منتوج بوحدو.',
+    benefits: [
+      { title: 'عضلات وطاقة', text: 'Vital Boost Protein كيدعم نمو العضلات والأداء البدني.' },
+      { title: 'بشرة، شعر وأظافر', text: 'Collagen Marine كيغذي البشرة وكيقوي الأظافر والشعر.' },
+      { title: 'مفاصل قوية', text: 'كيحمي المفاصل وكيسرّع الاستشفاء من بعد التمرين.' },
+    ],
+    tableTitle: 'في كل جرعة',
+    table: [
+      { label: 'بروتين (Vital Boost)', value: '24.2 غ' },
+      { label: 'كولاجين بحري', value: '9.8 غ' },
+      { label: 'BCAA (4:1:1)', value: '5.6 غ' },
+      { label: 'سكر مضاف', value: '0 غ' },
+    ],
+    contents: ['Vital Boost Protein · 250 غ', 'Collagen Marine · 250 غ'],
+    flavorsAr: { 'pack-choco-natural': 'شوكولاتة + بلا نكهة', 'pack-vanilla-lemon': 'فانيلا + ليمون', 'pack-caramel-vanilla': 'كراميل + فانيلا' },
+    format: 'جوج علب 250 غ',
+  },
+  [PACK_SANTE_PRODUCT.id]: {
+    nameAr: 'باك الصحة المتكامل',
+    subtitle: 'زنك + حديد وفيتامين C + مغنيسيوم',
+    description:
+      'ثلاثة مكملات أساسية في باك واحد: الزنك، الحديد مع فيتامين C، والمغنيسيوم على شكل حلوى (Gummies). للطاقة والمناعة والنوم في الحياة اليومية.',
+    forWho: 'للي كيحس بالعيا، ولا بغا يدعم المناعة والنوم ديالو كل نهار.',
+    benefits: [
+      { title: 'الزنك · 30 كبسولة', text: 'دعم المناعة، وتحسين صحة الجلد والشعر والأظافر.' },
+      { title: 'الحديد + فيتامين C · 30 كبسولة', text: 'يساهم في إنتاج كريات الدم الحمراء ودعم المناعة.' },
+      { title: 'مغنيسيوم كومبلكس · 25 حبة Gummies', text: 'يساهم في دعم العضلات وتقليل التوتر ويحسن جودة النوم.' },
+    ],
+    contents: ['Zinc · 30 كبسولة', 'Fer + Vitamine C · 30 كبسولة', 'Magnésium Complex · 25 Gummies'],
+    format: '3 علب',
+  },
+};
+
+interface DetailEntry {
+  product: Product;
+  img: Pic;
+  dark?: boolean;
+}
+
+const ProductDetail: React.FC<{
+  entry: DetailEntry;
+  flavorIndex: number;
+  onFlavor: (i: number) => void;
+  onClose: () => void;
+  onAdd: (item: CartItem) => void;
+}> = ({ entry, flavorIndex, onFlavor, onClose, onAdd }) => {
+  const { product: p, img, dark } = entry;
+  const info = AR_INFO[p.id];
+  const [qty, setQty] = useState(1);
+
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [onClose]);
+
+  if (!info) return null;
+  const hasDiscount = p.compareAtPriceMAD > p.priceMAD;
+  const total = p.priceMAD * qty;
+
+  const add = () => {
+    const item = makeItem(p, flavorIndex, img.src);
+    onAdd({ ...item, quantity: qty });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center" role="dialog" aria-modal="true" aria-label={info.nameAr}>
+      <button type="button" aria-label="إغلاق" onClick={onClose} className="absolute inset-0 bg-[#0B2A1A]/70 backdrop-blur-sm cursor-pointer" />
+      <div
+        dir="rtl"
+        lang="ar"
+        className="relative bg-white w-full md:max-w-[1040px] max-h-[92vh] md:max-h-[88vh] rounded-t-[28px] md:rounded-[32px] overflow-hidden flex flex-col shadow-[0_40px_100px_rgba(0,0,0,0.35)]"
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="إغلاق"
+          className="absolute top-4 left-4 z-10 w-11 h-11 rounded-full bg-white/95 border border-[#E1E8E0] flex items-center justify-center cursor-pointer hover:bg-[#F2F5F1]"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="overflow-y-auto flex-1">
+          <div className="grid md:grid-cols-2">
+            {/* Image (reste visible pendant le défilement sur ordinateur) */}
+            <div className="relative md:sticky md:top-0 md:self-start md:h-[calc(88vh-90px)] aspect-square md:aspect-auto">
+              <div
+                className="absolute inset-3 md:inset-4 rounded-[24px] overflow-hidden flex items-center justify-center"
+                style={{
+                  background: dark
+                    ? '#0B2A1A'
+                    : 'radial-gradient(circle at 50% 45%, #FFFFFF 0%, #F2F5F1 62%, #E6ECE4 100%)',
+                }}
+              >
+                <img
+                  src={img.src}
+                  alt={p.name}
+                  className={
+                    dark
+                      ? 'w-[94%] h-auto max-h-[78%] object-contain rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.35)]'
+                      : 'mix-blend-multiply'
+                  }
+                  style={
+                    dark
+                      ? undefined
+                      : {
+                          ...picStyle(img, 90),
+                          filter: `${img.filter === 'none' ? '' : img.filter} contrast(1.04) saturate(1.05)`.trim(),
+                        }
+                  }
+                />
+                {hasDiscount && (
+                  <span className="absolute right-4 top-4 text-[14px] font-black px-4 py-2 rounded-full text-[#0B2A1A] shadow-md" dir="ltr" style={{ background: ACCENT }}>
+                    -{pct(p)}%
+                  </span>
+                )}
+                <div className="absolute inset-x-4 bottom-4 flex flex-wrap justify-center gap-2">
+                  <span className="bg-white/95 text-[#0F1A14] text-[12px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#1E4D2B]" /> الدفع عند الاستلام
+                  </span>
+                  <span className="bg-white/95 text-[#0F1A14] text-[12px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+                    <Truck className="w-3.5 h-3.5 text-[#1E4D2B]" /> توصيل 24–48 ساعة
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Infos */}
+            <div className="p-6 md:p-9 flex flex-col gap-6 text-right">
+              <div className="flex flex-col gap-2">
+                <span className="text-[13px] font-bold text-[#1E4D2B]">{info.subtitle}</span>
+                <h2 className="m-0 font-sans font-black text-[32px] md:text-[38px] leading-tight text-[#0F1A14]">{info.nameAr}</h2>
+                <span dir="ltr" className="af-display text-right font-bold text-[15px] text-[#4A5A4F]">{p.name}</span>
+              </div>
+
+              <div className="flex flex-wrap items-baseline gap-3">
+                <span className="af-display font-black text-[40px] tracking-[-0.03em]" dir="ltr">{p.priceMAD} DH</span>
+                {hasDiscount && (
+                  <>
+                    <span className="text-lg text-[#6B776F] line-through" dir="ltr">{p.compareAtPriceMAD} DH</span>
+                    <span className="text-[13px] font-extrabold px-3 py-1.5 rounded-full bg-[#E3F1DF] text-[#1E4D2B]">
+                      كتوفر {saving(p)} درهم
+                    </span>
+                  </>
+                )}
+              </div>
+
+              <p className="m-0 text-[16px] leading-[1.9] text-[#26332B]">{info.description}</p>
+
+              <div className="rounded-2xl bg-[#F2F5F1] px-4 py-3.5 text-[15px] leading-relaxed text-[#26332B]">
+                <strong className="text-[#1E4D2B]">لمن هذا المنتوج؟ </strong>
+                {info.forWho}
+              </div>
+
+              {info.contents && (
+                <div className="flex flex-col gap-2.5">
+                  <h3 className="m-0 font-sans font-extrabold text-lg">شنو كاين في الباك؟</h3>
+                  <ul className="m-0 p-0 list-none flex flex-col gap-2">
+                    {info.contents.map((c) => (
+                      <li key={c} className="flex items-center gap-2.5 text-[15px] font-semibold border border-[#E1E8E0] rounded-xl px-3.5 py-2.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#1E4D2B] shrink-0" />
+                        <span dir="auto">{c}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-3">
+                <h3 className="m-0 font-sans font-extrabold text-lg">الفوائد</h3>
+                <ul className="m-0 p-0 list-none flex flex-col gap-3">
+                  {info.benefits.map((b) => (
+                    <li key={b.title} className="flex gap-3 items-start">
+                      <span className="mt-0.5 w-7 h-7 rounded-full bg-[#0B2A1A] flex items-center justify-center shrink-0">
+                        <Check className="w-4 h-4" style={{ color: ACCENT }} />
+                      </span>
+                      <span className="flex flex-col gap-0.5">
+                        <span className="font-bold text-[15px]">{b.title}</span>
+                        <span className="text-[14px] leading-relaxed text-[#4A5A4F]">{b.text}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {info.table && (
+                <div className="flex flex-col gap-3">
+                  <h3 className="m-0 font-sans font-extrabold text-lg">{info.tableTitle}</h3>
+                  <div className="border border-[#E1E8E0] rounded-2xl overflow-hidden">
+                    {info.table.map((r, i) => (
+                      <div key={r.label} className={`flex justify-between gap-4 px-4 py-2.5 text-[14px] ${i % 2 ? 'bg-[#F7F9F6]' : 'bg-white'}`}>
+                        <span className="text-[#26332B]">{r.label}</span>
+                        <span className="font-bold whitespace-nowrap" dir="ltr">{r.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-2.5 items-start rounded-2xl border border-[#E1E8E0] px-4 py-3.5 text-[14px] leading-relaxed text-[#4A5A4F]">
+                <Info className="w-5 h-5 shrink-0 text-[#1E4D2B] mt-0.5" />
+                <span>
+                  <strong className="text-[#0F1A14]">طريقة الاستعمال: </strong>
+                  تبع الجرعة المكتوبة على العلبة، وما تفوتش الجرعة اليومية. مكمل غذائي، ما كيعوضش نظام غذائي متوازن. إلا كنتي حاملة ولا عندك مرض، استشير الطبيب.
+                </span>
+              </div>
+
+              {p.flavors.length > 1 && (
+                <div className="flex flex-col gap-2.5">
+                  <h3 className="m-0 font-sans font-extrabold text-lg">اختار النكهة</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {p.flavors.map((f, i) => {
+                      const on = i === flavorIndex;
+                      return (
+                        <button
+                          key={f.id}
+                          type="button"
+                          aria-pressed={on}
+                          onClick={() => onFlavor(i)}
+                          className={`min-h-11 px-4 rounded-full border text-[14px] font-semibold cursor-pointer transition-colors ${
+                            on ? 'bg-[#0F1A14] text-white border-[#0F1A14]' : 'bg-white text-[#0F1A14] border-[#D5DDD4] hover:border-[#0F1A14]'
+                          }`}
+                        >
+                          {info.flavorsAr?.[f.id] || f.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-[#4A5A4F]">
+                <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#1E4D2B]" /> الدفع عند الاستلام</span>
+                <span className="flex items-center gap-1.5"><Truck className="w-4 h-4 text-[#1E4D2B]" /> توصيل 24–48 ساعة لجميع المدن</span>
+                <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-[#1E4D2B]" /> التوصيل مجاني ابتداءً من {FREE_SHIPPING_MAD} درهم</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Barre d'achat */}
+        <div className="border-t border-[#E1E8E0] bg-white px-5 md:px-9 py-4 flex items-center gap-3">
+          <div className="flex items-center border border-[#D5DDD4] rounded-full h-14 shrink-0">
+            <button type="button" aria-label="زيد واحد" onClick={() => setQty((q) => Math.min(10, q + 1))} className="w-10 md:w-12 h-full flex items-center justify-center cursor-pointer">
+              <Plus className="w-4 h-4" />
+            </button>
+            <span className="w-8 text-center font-bold text-lg" aria-live="polite">{qty}</span>
+            <button type="button" aria-label="نقص واحد" onClick={() => setQty((q) => Math.max(1, q - 1))} className="w-10 md:w-12 h-full flex items-center justify-center cursor-pointer">
+              <Minus className="w-4 h-4" />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={add}
+            className="flex-1 min-w-0 h-14 px-4 rounded-full bg-[#1E4D2B] hover:bg-[#163a20] text-white font-bold text-[15px] md:text-[16px] whitespace-nowrap flex items-center justify-center gap-2 cursor-pointer transition-colors"
+          >
+            <ShoppingBag className="w-5 h-5 shrink-0" />
+            <span>أضف إلى السلة</span>
+            <span dir="ltr" className="opacity-80">· {total} DH</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface StorefrontProps {
   cartCount: number;
@@ -100,6 +491,7 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
   const [flavor, setFlavor] = useState<Record<string, number>>({});
   const [goal, setGoal] = useState<string>('muscle');
   const [faqOpen, setFaqOpen] = useState<number>(0);
+  const [detail, setDetail] = useState<DetailEntry | null>(null);
 
   const fIdx = (id: string) => flavor[id] ?? 0;
   const setF = (id: string) => (i: number) => setFlavor((prev) => ({ ...prev, [id]: i }));
@@ -110,7 +502,7 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
     { p: MEGA_MASS_PRODUCT, img: IMG.megamass, kicker: 'Prise de masse · 250g', badge: 'Prise de masse', desc: 'Whey 70%, créatine 10%, collagène 15% et fenugrec 3%.' },
   ];
 
-  const GOALS = [
+  const GOALS: { id: string; label: string; hint: string; p: Product; img: Pic; dark?: boolean; why: string }[] = [
     { id: 'muscle', label: 'Prendre du muscle', hint: 'Récupération et volume', p: FLAGSHIP_PRODUCT, img: IMG.protein, why: 'Isolat de whey riche en BCAA 4:1:1 et L-Glutamine, pour récupérer vite après chaque séance.' },
     { id: 'mass', label: 'Prendre du poids', hint: 'Masse et appétit', p: MEGA_MASS_PRODUCT, img: IMG.megamass, why: '70% whey, 10% créatine, 15% collagène et 3% fenugrec pour une prise de masse progressive.' },
     { id: 'skin', label: 'Peau, cheveux, articulations', hint: 'Beauté et mobilité', p: COLLAGEN_PRODUCT, img: IMG.collagen, why: 'Peptides de collagène marin type I et III, avec zinc et vitamine C.' },
@@ -230,7 +622,7 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
             <div aria-hidden="true" className="absolute inset-0 rounded-full bg-[#F2F5F1]" />
             <div aria-hidden="true" className="absolute -inset-[22px] rounded-full border border-[#E8EFE7]/20" />
             <div className="absolute inset-0 flex items-center justify-center px-[6%]">
-              <div className="af-float2 relative z-[1] w-[32%] -mr-[7%] mt-[10%] mix-blend-multiply">
+              <div className="af-float2 relative z-[1] w-[36%] -mr-[8%] mt-[12%] mix-blend-multiply">
                 <img
                   className="block w-full aspect-square object-cover"
                   style={{ filter: IMG.collagen.filter }}
@@ -238,15 +630,15 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
                   alt="Collagen Marine AtlasForge"
                 />
               </div>
-              <div className="af-float relative z-[2] w-[48%] mix-blend-multiply">
+              <div className="af-float relative z-[2] w-[54%] mix-blend-multiply">
                 <img
                   className="block w-full"
-                  style={{ filter: IMG.protein.filter }}
+                  style={{ filter: IMG.protein.filter, transform: 'scale(1.08)' }}
                   src={IMG.protein.src}
                   alt="Protéine Musculaire AtlasForge"
                 />
               </div>
-              <div className="af-float3 relative z-[1] w-[34%] -ml-[7%] mt-[10%] mix-blend-multiply">
+              <div className="af-float3 relative z-[1] w-[38%] -ml-[8%] mt-[12%] mix-blend-multiply">
                 <img
                   className="block w-full"
                   style={{ filter: IMG.megamass.filter, transform: 'scale(1.3)' }}
@@ -316,12 +708,17 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
                 key={p.id}
                 className="af-card flex flex-col gap-[18px] p-3.5 pb-5 rounded-[30px] bg-white border border-[#E1E8E0]"
               >
-                <div className="relative aspect-square rounded-[22px] bg-[#F2F5F1] overflow-hidden flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => setDetail({ product: p, img })}
+                  aria-label={`Voir le produit ${p.name}`}
+                  className="relative aspect-square rounded-[22px] bg-[#F2F5F1] overflow-hidden flex items-center justify-center cursor-pointer border-0 p-0"
+                >
                   <img
                     src={img.src}
                     alt={`Pot AtlasForge ${p.name}`}
-                    className="w-[90%] h-[90%] object-contain mix-blend-multiply"
-                    style={{ filter: img.filter, objectFit: p.id === COLLAGEN_PRODUCT.id ? 'cover' : 'contain' }}
+                    className="mix-blend-multiply"
+                    style={picStyle(img, 88)}
                   />
                   <span className="absolute left-3.5 top-3.5 text-xs font-extrabold tracking-[0.04em] px-3 py-[7px] rounded-full bg-[#0B2A1A] text-white">
                     {badge}
@@ -332,7 +729,7 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
                   >
                     -{pct(p)}%
                   </span>
-                </div>
+                </button>
                 <div className="flex flex-col gap-1.5 px-1.5">
                   <span className="text-xs font-semibold tracking-[0.1em] uppercase text-[#4A5A4F]">{kicker}</span>
                   <h3 className="af-display m-0 font-extrabold text-[26px] tracking-[-0.02em]">{p.name}</h3>
@@ -353,10 +750,10 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
                   </div>
                   <button
                     type="button"
-                    onClick={() => onAddToCart(makeItem(p, fIdx(p.id), img.src))}
+                    onClick={() => setDetail({ product: p, img })}
                     className="w-full h-[54px] rounded-full bg-[#1E4D2B] hover:bg-[#163a20] text-white font-bold text-[15px] flex items-center justify-center gap-2.5 cursor-pointer transition-colors"
                   >
-                    <ShoppingBag className="w-[18px] h-[18px]" /> Ajouter au panier
+                    <Eye className="w-[18px] h-[18px]" /> Voir le produit · <span lang="ar">شوف التفاصيل</span>
                   </button>
                 </div>
               </article>
@@ -384,7 +781,9 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
             {/* Pack Duo */}
             <article className="af-card bg-[#F2F5F1] rounded-[36px] overflow-hidden flex flex-col">
               <div className="relative aspect-[16/10] overflow-hidden flex items-center justify-center bg-[#F2F5F1]">
-                <img src={IMG.packDuo.src} alt="Pack Duo : Vital Boost Protein et Collagen Marine" className="w-[78%] h-auto mix-blend-multiply" />
+                <button type="button" onClick={() => setDetail({ product: PACK_DUO_PRODUCT, img: IMG.packDuo })} aria-label="Voir le Pack Duo" className="absolute inset-0 flex items-center justify-center cursor-pointer border-0 p-0 bg-transparent">
+                  <img src={IMG.packDuo.src} alt="Pack Duo : Vital Boost Protein et Collagen Marine" className="w-[78%] h-auto mix-blend-multiply" />
+                </button>
                 <span className="absolute left-5 top-5 text-xs font-extrabold tracking-[0.06em] uppercase px-3.5 py-2 rounded-full bg-[#0B2A1A] text-white">
                   Meilleure vente
                 </span>
@@ -419,10 +818,10 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
                   </span>
                   <button
                     type="button"
-                    onClick={() => onAddToCart(makeItem(PACK_DUO_PRODUCT, fIdx(PACK_DUO_PRODUCT.id), IMG.packDuo.src))}
-                    className="h-14 px-7 rounded-full bg-[#1E4D2B] hover:bg-[#163a20] text-white font-bold text-[15px] cursor-pointer transition-colors"
+                    onClick={() => setDetail({ product: PACK_DUO_PRODUCT, img: IMG.packDuo })}
+                    className="h-14 px-7 rounded-full bg-[#1E4D2B] hover:bg-[#163a20] text-white font-bold text-[15px] cursor-pointer transition-colors flex items-center gap-2"
                   >
-                    Ajouter au panier
+                    <Eye className="w-[18px] h-[18px]" /> Voir le pack
                   </button>
                 </div>
               </div>
@@ -431,12 +830,19 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
             {/* Pack Santé */}
             <article className="af-card bg-[#0B2A1A] text-white rounded-[36px] overflow-hidden flex flex-col">
               <div className="relative aspect-[16/10] overflow-hidden bg-[#0B2A1A]">
-                <img
-                  src={PACK_SANTE_IMAGE}
-                  alt="Pack Santé : Zinc, Fer + Vitamine C et Magnésium Complex Gummies"
-                  className="w-full h-full object-cover block"
-                  style={{ objectPosition: 'center 70%' }}
-                />
+                <button
+                  type="button"
+                  onClick={() => setDetail({ product: PACK_SANTE_PRODUCT, img: { src: PACK_SANTE_IMAGE, filter: 'none' }, dark: true })}
+                  aria-label="Voir le Pack Santé"
+                  className="absolute inset-0 cursor-pointer border-0 p-0 bg-transparent"
+                >
+                  <img
+                    src={PACK_SANTE_IMAGE}
+                    alt="Pack Santé : Zinc, Fer + Vitamine C et Magnésium Complex Gummies"
+                    className="w-full h-full object-cover block"
+                    style={{ objectPosition: 'center 70%' }}
+                  />
+                </button>
                 <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[30%] bg-linear-to-b from-[#0B2A1A] to-transparent" />
                 <span className="absolute left-5 top-5 text-xs font-extrabold tracking-[0.06em] uppercase px-3.5 py-2 rounded-full text-[#0B2A1A]" style={{ background: ACCENT }}>
                   Nouveau
@@ -477,11 +883,11 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
                   </span>
                   <button
                     type="button"
-                    onClick={() => onAddToCart(makeItem(PACK_SANTE_PRODUCT, 0, PACK_SANTE_IMAGE))}
-                    className="h-14 px-7 rounded-full text-[#0B2A1A] font-extrabold text-[15px] cursor-pointer hover:opacity-90"
+                    onClick={() => setDetail({ product: PACK_SANTE_PRODUCT, img: { src: PACK_SANTE_IMAGE, filter: 'none' }, dark: true })}
+                    className="h-14 px-7 rounded-full text-[#0B2A1A] font-extrabold text-[15px] cursor-pointer hover:opacity-90 flex items-center gap-2"
                     style={{ background: ACCENT }}
                   >
-                    Ajouter au panier
+                    <Eye className="w-[18px] h-[18px]" /> Voir le pack
                   </button>
                 </div>
               </div>
@@ -530,8 +936,8 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
                 <img
                   src={rec.img.src}
                   alt={`AtlasForge ${rec.p.name}`}
-                  className={rec.dark ? 'w-full h-full object-cover' : 'w-[90%] h-[90%] object-contain mix-blend-multiply'}
-                  style={{ filter: rec.img.filter, objectPosition: rec.dark ? 'center 70%' : undefined }}
+                  className={rec.dark ? 'w-[94%] h-auto object-contain rounded-2xl' : 'mix-blend-multiply'}
+                  style={rec.dark ? undefined : picStyle(rec.img, 88)}
                 />
               </div>
               <div className="flex-[1_1_240px] flex flex-col gap-3.5">
@@ -548,7 +954,7 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
                 </span>
                 <button
                   type="button"
-                  onClick={() => onAddToCart(makeItem(rec.p, 0, rec.img.src))}
+                  onClick={() => setDetail({ product: rec.p, img: rec.img, dark: rec.dark })}
                   className="h-14 rounded-full bg-[#1E4D2B] hover:bg-[#163a20] text-white font-bold text-base cursor-pointer transition-colors"
                 >
                   Commander · {rec.p.priceMAD} DH
@@ -732,6 +1138,17 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
           Commander
         </a>
       </div>
+
+      {/* Fenêtre détails produit (arabe) */}
+      {detail && (
+        <ProductDetail
+          entry={detail}
+          flavorIndex={fIdx(detail.product.id)}
+          onFlavor={setF(detail.product.id)}
+          onClose={() => setDetail(null)}
+          onAdd={onAddToCart}
+        />
+      )}
     </div>
   );
 };
