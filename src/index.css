@@ -1,22 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
-  body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    background-color: #FAFAFA;
-    color: #14171A;
+  html {
+    scroll-behavior: smooth;
   }
-  
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #FFFFFF;
+    color: #0F1A14;
+  }
+
   h1, h2, h3, h4, .font-serif-heading {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Archivo', system-ui, sans-serif;
     letter-spacing: -0.015em;
   }
 
   .font-sans-body {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
+}
+
+/* ===== Nouveau design AtlasForge ===== */
+.af-body { font-family: 'Inter', system-ui, sans-serif; }
+.af-display { font-family: 'Archivo', system-ui, sans-serif; }
+.af-serif { font-family: 'Instrument Serif', Georgia, serif; }
+
+.af-card { transition: transform .25s ease, box-shadow .25s ease; }
+.af-card:hover { transform: translateY(-6px); box-shadow: 0 30px 60px rgba(11, 42, 26, 0.12); }
+.af-card img { transition: transform .4s ease; }
+.af-card:hover img { transform: scale(1.04); }
+
+@keyframes afMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes afFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+.af-marquee { display: inline-flex; animation: afMarquee 30s linear infinite; }
+.af-float, .af-float2, .af-float3 { will-change: transform; }
+.af-float { animation: afFloat 5s ease-in-out infinite; }
+.af-float2 { animation: afFloat 5s ease-in-out -1.7s infinite; }
+.af-float3 { animation: afFloat 5s ease-in-out -3.4s infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .af-marquee, .af-float, .af-float2, .af-float3 { animation: none; }
+  html { scroll-behavior: auto; }
 }
 
 /* Custom scrollbars for classic bio-luxe aesthetic */

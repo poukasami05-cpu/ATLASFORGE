@@ -24,6 +24,11 @@ export const SPACESELLER_SKU_MAP: Record<string, string | string[]> = {
   'atlas-mega-mass-125': 'gainpro250g', // Mega Mass 250g
   // Pack Duo = 2 produits → 2 lignes (le prix total va sur la 1ère ligne)
   'atlas-pack-duo-500': ['pro-testo250g', 'collagen-prodre'],
+  // Gamme Santé (nouveaux produits)
+  'atlas-zinc': 'zinc-picolinate', // Zinc
+  'atlas-fer-vitc': 'fer30', // Fer + Vitamine C
+  'atlas-magnesium-gummies': 'gumies_magnesieum', // Magnésium Complex Gummies
+  'atlas-pack-sante': ['zinc-picolinate', 'fer30', 'gumies_magnesieum'], // Pack Santé Complet 199 DH
 };
 
 // ============================================================================

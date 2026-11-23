@@ -58,7 +58,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   }, [isOpen, onClose]);
 
   const subtotalMAD = items.reduce((acc, item) => acc + item.priceMAD * item.quantity, 0);
-  const shippingFeeMAD = subtotalMAD >= 450 ? 0 : 35;
+  const shippingFeeMAD = subtotalMAD >= 500 ? 0 : 35;
   const totalMAD = subtotalMAD + shippingFeeMAD;
 
   const selectedCityInfo = MOROCCAN_CITIES.find((c) => c.name === customer.city) || MOROCCAN_CITIES[0];
