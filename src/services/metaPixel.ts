@@ -1,7 +1,7 @@
 /**
  * Meta (Facebook) Pixel – pour les pubs Meta Ads.
  */
-export const META_PIXEL_ID = '1087161004375149';
+export const META_PIXEL_ID = '1129099689965231';
 
 type Fbq = ((...args: unknown[]) => void) & { callMethod?: (...a: unknown[]) => void; queue?: unknown[]; loaded?: boolean; version?: string; push?: unknown };
 
