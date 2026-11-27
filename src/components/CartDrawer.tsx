@@ -47,9 +47,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
   const totalUnits = items.reduce((acc, item) => acc + item.quantity, 0);
   const subtotalMAD = items.reduce((acc, item) => acc + item.priceMAD * item.quantity, 0);
-  const freeShippingThresholdMAD = 500;
+  // Livraison GRATUITE pour toutes les commandes (remettre 500 pour réactiver le seuil)
+  const freeShippingThresholdMAD = 0;
   const missingForFreeShipping = Math.max(0, freeShippingThresholdMAD - subtotalMAD);
-  const freeShippingProgress = Math.min(100, Math.round((subtotalMAD / freeShippingThresholdMAD) * 100));
+  const freeShippingProgress = freeShippingThresholdMAD > 0 ? Math.min(100, Math.round((subtotalMAD / freeShippingThresholdMAD) * 100)) : 100;
   const shippingFeeMAD = subtotalMAD >= freeShippingThresholdMAD || items.length === 0 ? 0 : 35;
   const totalMAD = subtotalMAD + shippingFeeMAD;
 
@@ -103,8 +104,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               <div className="px-4 py-3 sm:p-4 bg-[#F4F7F4] border-b border-slate-200 shrink-0">
                 <div className="flex items-center justify-between gap-2 text-[11px] sm:text-xs mb-1.5 font-sans-body">
                   <span className="text-slate-700 font-medium leading-snug">
-                    {missingForFreeShipping === 0 && items.length > 0 ? (
-                      <span className="text-[#1E4D2B] font-bold">✓ Livraison Gratuite Débloquée !</span>
+                    {missingForFreeShipping === 0 ? (
+                      <span className="text-[#1E4D2B] font-bold">✓ Livraison GRATUITE partout au Maroc</span>
                     ) : (
                       <>
                         Plus que <strong className="text-slate-900 font-bold">{missingForFreeShipping} MAD</strong> pour la livraison gratuite

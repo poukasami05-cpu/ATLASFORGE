@@ -58,7 +58,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   }, [isOpen, onClose]);
 
   const subtotalMAD = items.reduce((acc, item) => acc + item.priceMAD * item.quantity, 0);
-  const shippingFeeMAD = subtotalMAD >= 500 ? 0 : 35;
+  // Livraison GRATUITE pour toutes les commandes (mettre 35 ici pour remettre les frais)
+  const shippingFeeMAD = 0;
   const totalMAD = subtotalMAD + shippingFeeMAD;
 
   const selectedCityInfo = MOROCCAN_CITIES.find((c) => c.name === customer.city) || MOROCCAN_CITIES[0];
@@ -324,7 +325,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <span>Frais d'expédition Spaceseller :</span>
                     <span className="font-mono tabular-nums text-slate-900">
                       {shippingFeeMAD === 0 ? (
-                        <strong className="text-[#1E4D2B]">Gratuits (Offre Spéciale)</strong>
+                        <strong className="text-[#1E4D2B]">Gratuite</strong>
                       ) : (
                         `${shippingFeeMAD} MAD`
                       )}

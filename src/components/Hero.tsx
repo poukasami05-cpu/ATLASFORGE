@@ -47,7 +47,6 @@ const picStyle = (pic: Pic, base: number): React.CSSProperties => {
 };
 
 const ACCENT = '#B9F26B';
-const FREE_SHIPPING_MAD = 500;
 
 const CITIES = ['Casablanca', 'Rabat', 'Marrakech', 'Tanger', 'Fès', 'Meknès', 'Agadir', 'Kénitra', 'Oujda', 'Mohammedia'];
 
@@ -404,7 +403,7 @@ const ProductDetail: React.FC<{
               <div className="flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-[#4A5A4F]">
                 <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#1E4D2B]" /> الدفع عند الاستلام</span>
                 <span className="flex items-center gap-1.5"><Truck className="w-4 h-4 text-[#1E4D2B]" /> توصيل 24–48 ساعة لجميع المدن</span>
-                <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-[#1E4D2B]" /> التوصيل مجاني ابتداءً من {FREE_SHIPPING_MAD} درهم</span>
+                <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-[#1E4D2B]" /> التوصيل مجاني</span>
               </div>
             </div>
           </div>
@@ -556,7 +555,7 @@ const BlackFridayPack: React.FC<{ onBuyNow: () => void; onDetails: () => void }>
                 <span className="text-sm font-bold" style={{ color: ACCENT }}>وفر {saving(p)} درهم</span>
               </span>
             )}
-            {!hasDiscount && <span className="text-sm font-bold pb-2" style={{ color: ACCENT }}>3 منتجات بثمن واحد</span>}
+            {!hasDiscount && <span className="text-sm font-bold pb-2" style={{ color: ACCENT }}>التوصيل مجاني 🚚</span>}
           </div>
 
           {!expired && (
@@ -589,7 +588,7 @@ const BlackFridayPack: React.FC<{ onBuyNow: () => void; onDetails: () => void }>
 
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-[14px] text-[#C9D8C8]">
             <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" style={{ color: ACCENT }} /> الدفع عند الاستلام</span>
-            <span className="flex items-center gap-1.5"><Truck className="w-4 h-4" style={{ color: ACCENT }} /> التوصيل لجميع مدن المغرب</span>
+            <span className="flex items-center gap-1.5"><Truck className="w-4 h-4" style={{ color: ACCENT }} /> التوصيل مجاني لجميع مدن المغرب</span>
           </div>
         </div>
       </div>
@@ -641,7 +640,7 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
   const FAQ = [
     { q: 'Comment je paie ?', a: 'En espèces, au livreur, quand tu reçois ton colis. Aucune carte bancaire n’est demandée sur le site.' },
     { q: 'En combien de temps je reçois ma commande ?', a: 'En 24 à 48h dans la plupart des villes du Maroc. Le livreur t’appelle avant de passer.' },
-    { q: 'Combien coûte la livraison ?', a: `35 DH, et gratuite dès ${FREE_SHIPPING_MAD} DH d’achat.` },
+    { q: 'Combien coûte la livraison ?', a: 'La livraison est GRATUITE partout au Maroc.' },
     { q: 'Comment je confirme ma commande ?', a: 'Après ta commande, on t’appelle sur ton numéro pour confirmer l’adresse et l’heure de livraison.' },
   ];
 
@@ -651,7 +650,7 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
     <div className="af-body w-full bg-white text-[#0F1A14]">
       {/* Announcement */}
       <a href="#pack" className="block bg-black text-white text-[13px] md:text-sm font-bold px-4 py-2.5 text-center no-underline">
-        🔥 <span style={{ color: ACCENT }}>BLACK FRIDAY</span> · Pack Santé à {PACK_SANTE_PRODUCT.priceMAD} DH · Paiement à la livraison
+        🔥 <span style={{ color: ACCENT }}>BLACK FRIDAY</span> · Pack Santé à {PACK_SANTE_PRODUCT.priceMAD} DH · Livraison GRATUITE
       </a>
 
       {/* Nav */}
