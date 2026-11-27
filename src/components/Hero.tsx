@@ -440,6 +440,8 @@ interface StorefrontProps {
   cartCount: number;
   onOpenCart: () => void;
   onAddToCart: (item: CartItem) => void;
+  /** Achat direct : ajoute au panier et ouvre directement la commande */
+  onBuyNow?: (item: CartItem) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -485,13 +487,138 @@ const FlavorPills: React.FC<{ product: Product; value: number; onChange: (i: num
 );
 
 // ---------------------------------------------------------------------------
+// BLACK FRIDAY · Pack Santé (en haut de la page, lien direct pour les pubs : #pack)
+// ---------------------------------------------------------------------------
+/** Fin de l'offre (heure du Maroc, GMT+1). Change la date ici pour prolonger la promo. */
+const PROMO_END = new Date('2026-11-30T23:59:59+01:00');
+
+const useCountdown = (end: Date) => {
+  const [left, setLeft] = useState(() => Math.max(0, end.getTime() - Date.now()));
+  useEffect(() => {
+    const t = window.setInterval(() => setLeft(Math.max(0, end.getTime() - Date.now())), 1000);
+    return () => window.clearInterval(t);
+  }, [end]);
+  const s = Math.floor(left / 1000);
+  return { expired: left <= 0, d: Math.floor(s / 86400), h: Math.floor((s % 86400) / 3600), m: Math.floor((s % 3600) / 60), sec: s % 60 };
+};
+
+const BlackFridayPack: React.FC<{ onBuyNow: () => void; onDetails: () => void }> = ({ onBuyNow, onDetails }) => {
+  const p = PACK_SANTE_PRODUCT;
+  const { expired, d, h, m, sec } = useCountdown(PROMO_END);
+  const hasDiscount = p.compareAtPriceMAD > p.priceMAD;
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  return (
+    <section id="pack" className="scroll-mt-24 relative overflow-hidden bg-[#050F09] text-white px-4 md:px-12 py-8 md:py-14">
+      <div aria-hidden="true" className="absolute -left-40 -top-40 w-[520px] h-[520px] rounded-full opacity-25 blur-3xl" style={{ background: ACCENT }} />
+      <div dir="rtl" lang="ar" className="relative max-w-[1180px] mx-auto grid md:grid-cols-2 gap-6 md:gap-12 items-center">
+        {/* Image */}
+        <button
+          type="button"
+          onClick={onDetails}
+          aria-label="شوف تفاصيل الباك"
+          className="relative rounded-[28px] overflow-hidden aspect-[720/415] bg-[#0B2A1A] cursor-pointer border-0 p-0 order-1"
+        >
+          <img src={PACK_SANTE_IMAGE} alt="باك الصحة: Zinc + Fer & Vitamine C + Magnésium Complex Gummies" className="w-full h-full object-cover block" />
+          <span className="absolute top-4 right-4 bg-black text-white text-sm md:text-base font-black tracking-[0.04em] px-4 py-2 rounded-full border-2" style={{ borderColor: ACCENT }} dir="ltr">
+            {expired ? 'OFFRE SPÉCIALE' : 'BLACK FRIDAY 🔥'}
+          </span>
+          {hasDiscount && (
+            <span className="absolute bottom-4 left-4 text-[#0B2A1A] font-black text-lg px-4 py-2 rounded-full" style={{ background: ACCENT }}>
+              -{pct(p)}%
+            </span>
+          )}
+        </button>
+
+        {/* Texte */}
+        <div className="flex flex-col gap-4 md:gap-5 order-2">
+          <span className="self-start text-[13px] font-extrabold px-3.5 py-1.5 rounded-full text-[#0B2A1A]" style={{ background: ACCENT }}>
+            {expired ? 'عرض خاص' : 'عرض Black Friday · محدود'}
+          </span>
+          <h2 className="m-0 font-black text-[34px] md:text-[52px] leading-[1.1]">باك الصحة المتكامل</h2>
+          <p className="m-0 text-[15px] md:text-[17px] text-[#C9D8C8]" dir="ltr" style={{ textAlign: 'right' }}>
+            Zinc + Fer &amp; Vitamine C + Magnésium Complex Gummies
+          </p>
+
+          <ul className="m-0 p-0 list-none flex flex-col gap-2 text-[15px] md:text-[16px]">
+            {['يساهم في دعم الطاقة والنشاط', 'يساهم في دعم المناعة', 'يساهم في دعم العضلات وجودة النوم'].map((t) => (
+              <li key={t} className="flex items-center gap-2.5">
+                <Check className="w-5 h-5 shrink-0" style={{ color: ACCENT }} /> {t}
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex items-end gap-3 flex-wrap">
+            <span className="font-black text-[52px] md:text-[64px] leading-none" dir="ltr">{p.priceMAD} DH</span>
+            {hasDiscount && (
+              <span className="flex flex-col gap-1 pb-1.5">
+                <span className="text-xl text-[#9FB5A0] line-through" dir="ltr">{p.compareAtPriceMAD} DH</span>
+                <span className="text-sm font-bold" style={{ color: ACCENT }}>وفر {saving(p)} درهم</span>
+              </span>
+            )}
+            {!hasDiscount && <span className="text-sm font-bold pb-2" style={{ color: ACCENT }}>3 منتجات بثمن واحد</span>}
+          </div>
+
+          {!expired && (
+            <div className="flex flex-col gap-2">
+              <span className="text-sm text-[#C9D8C8]">العرض كيسالي فـ:</span>
+              <div className="flex gap-2" dir="ltr" style={{ justifyContent: 'flex-end' }}>
+                {[
+                  [d, 'يوم'],
+                  [h, 'ساعة'],
+                  [m, 'دقيقة'],
+                  [sec, 'ثانية'],
+                ].map(([v, l]) => (
+                  <span key={l as string} className="w-[68px] md:w-[76px] bg-white/[0.08] border border-white/15 rounded-2xl py-2 flex flex-col items-center">
+                    <span className="font-black text-2xl md:text-3xl tabular-nums">{pad(v as number)}</span>
+                    <span className="text-[11px] text-[#C9D8C8]">{l}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={onBuyNow}
+            className="h-16 w-full md:w-auto md:px-12 rounded-full text-[#0B2A1A] font-black text-xl cursor-pointer hover:opacity-90 flex items-center justify-center gap-2.5 shadow-[0_14px_40px_rgba(185,242,107,0.35)]"
+            style={{ background: ACCENT }}
+          >
+            <ShoppingBag className="w-6 h-6" /> اطلب الباك دابا
+          </button>
+
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-[14px] text-[#C9D8C8]">
+            <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" style={{ color: ACCENT }} /> الدفع عند الاستلام</span>
+            <span className="flex items-center gap-1.5"><Truck className="w-4 h-4" style={{ color: ACCENT }} /> التوصيل لجميع مدن المغرب</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Storefront
 // ---------------------------------------------------------------------------
-export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, onAddToCart }) => {
+export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, onAddToCart, onBuyNow }) => {
   const [flavor, setFlavor] = useState<Record<string, number>>({});
   const [goal, setGoal] = useState<string>('muscle');
   const [faqOpen, setFaqOpen] = useState<number>(0);
   const [detail, setDetail] = useState<DetailEntry | null>(null);
+
+  const packDetail: DetailEntry = { product: PACK_SANTE_PRODUCT, img: { src: PACK_SANTE_IMAGE, filter: 'none' }, dark: true };
+  const buyPackNow = () => {
+    const item = makeItem(PACK_SANTE_PRODUCT, 0, PACK_SANTE_IMAGE);
+    if (onBuyNow) onBuyNow(item);
+    else onAddToCart(item);
+  };
+
+  // Lien des pubs (…/#pack) : on descend directement au Pack Santé
+  useEffect(() => {
+    if (window.location.hash === '#pack') {
+      window.setTimeout(() => document.getElementById('pack')?.scrollIntoView({ behavior: 'smooth' }), 150);
+    }
+  }, []);
 
   const fIdx = (id: string) => flavor[id] ?? 0;
   const setF = (id: string) => (i: number) => setFlavor((prev) => ({ ...prev, [id]: i }));
@@ -523,15 +650,9 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
   return (
     <div className="af-body w-full bg-white text-[#0F1A14]">
       {/* Announcement */}
-      <div className="bg-[#0B2A1A] text-[#E8EFE7] text-[13px] font-medium tracking-[0.02em] px-4 py-2.5 flex flex-wrap justify-center gap-x-5 gap-y-1 text-center">
-        <span>
-          <strong style={{ color: ACCENT }}>Livraison GRATUITE</strong> dès {FREE_SHIPPING_MAD} DH
-        </span>
-        <span aria-hidden="true" className="opacity-40">•</span>
-        <span>Livraison 24–48h partout au Maroc</span>
-        <span aria-hidden="true" className="opacity-40 hidden sm:inline">•</span>
-        <span className="hidden sm:inline">Paiement à la livraison</span>
-      </div>
+      <a href="#pack" className="block bg-black text-white text-[13px] md:text-sm font-bold px-4 py-2.5 text-center no-underline">
+        🔥 <span style={{ color: ACCENT }}>BLACK FRIDAY</span> · Pack Santé à {PACK_SANTE_PRODUCT.priceMAD} DH · Paiement à la livraison
+      </a>
 
       {/* Nav */}
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#E6EAE5] px-5 md:px-12">
@@ -568,6 +689,9 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
           </button>
         </nav>
       </header>
+
+      {/* BLACK FRIDAY · Pack Santé */}
+      <BlackFridayPack onBuyNow={buyPackNow} onDetails={() => setDetail(packDetail)} />
 
       {/* HERO */}
       <section id="top" className="relative overflow-hidden bg-[#0B2A1A] text-white px-5 md:px-12 py-16 md:py-24">
@@ -1131,12 +1255,12 @@ export const Storefront: React.FC<StorefrontProps> = ({ cartCount, onOpenCart, o
       {/* Mobile sticky bar */}
       <div className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-[#E1E8E0] px-4 py-3 flex items-center justify-between gap-3 shadow-[0_-10px_30px_rgba(11,42,26,0.10)]">
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs text-[#4A5A4F]">Packs dès</span>
+          <span className="text-xs font-bold text-[#1E4D2B]">Black Friday · Pack Santé</span>
           <span className="af-display font-black text-[22px]">{PACK_SANTE_PRODUCT.priceMAD} DH</span>
         </div>
-        <a href="#produits" className="h-[50px] px-6 rounded-full bg-[#1E4D2B] text-white font-bold text-[15px] flex items-center">
-          Commander
-        </a>
+        <button type="button" onClick={buyPackNow} className="h-[50px] px-6 rounded-full bg-[#1E4D2B] text-white font-bold text-[16px] flex items-center cursor-pointer">
+          اطلب دابا
+        </button>
       </div>
 
       {/* Fenêtre détails produit (arabe) */}

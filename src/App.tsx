@@ -16,6 +16,7 @@ import { OrderSuccessModal } from './components/OrderSuccessModal';
 import { CartItem, Order } from './types';
 import { SyncResult } from './services/googleSheetsService';
 import { ArrowLeft } from 'lucide-react';
+import { initMetaPixel, trackPixel } from './services/metaPixel';
 
 const isMerchantHash = () => typeof window !== 'undefined' && window.location.hash === '#spaceseller';
 
@@ -26,6 +27,11 @@ export default function App() {
   const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
   const [orderSync, setOrderSync] = useState<SyncResult | null>(null);
   const [showMerchant, setShowMerchant] = useState<boolean>(isMerchantHash());
+
+  // Meta Pixel (pubs Facebook / Instagram)
+  useEffect(() => {
+    initMetaPixel();
+  }, []);
 
   // Espace marchand : visible seulement avec #spaceseller (les clients ne le voient pas)
   useEffect(() => {
@@ -47,7 +53,7 @@ export default function App() {
     window.scrollTo({ top: 0 });
   };
 
-  const handleAddToCart = (newItem: CartItem) => {
+  const mergeIntoCart = (newItem: CartItem) => {
     setCartItems((prev) => {
       const existingIdx = prev.findIndex(
         (it) =>
@@ -62,7 +68,20 @@ export default function App() {
       }
       return [...prev, newItem];
     });
+  };
+
+  const handleAddToCart = (newItem: CartItem) => {
+    mergeIntoCart(newItem);
+    trackPixel('AddToCart', { content_ids: [newItem.productId], value: newItem.priceMAD * newItem.quantity, currency: 'MAD' });
     setIsCartOpen(true);
+  };
+
+  // Achat direct (bouton « اطلب الباك دابا ») : on ouvre directement le formulaire de commande
+  const handleBuyNow = (newItem: CartItem) => {
+    mergeIntoCart(newItem);
+    trackPixel('InitiateCheckout', { content_ids: [newItem.productId], value: newItem.priceMAD * newItem.quantity, currency: 'MAD' });
+    setIsCartOpen(false);
+    setIsCheckoutOpen(true);
   };
 
   const handleUpdateQuantity = (index: number, newQty: number) => {
@@ -85,6 +104,15 @@ export default function App() {
   const handleOrderPlaced = (order: Order, sync: SyncResult | null) => {
     setConfirmedOrder(order);
     setOrderSync(sync);
+    if (!sync || sync.success) {
+      trackPixel('Purchase', {
+        value: order.totalMAD,
+        currency: 'MAD',
+        content_ids: order.items.map((it) => it.productId),
+        content_type: 'product',
+        num_items: order.items.reduce((a, it) => a + it.quantity, 0),
+      });
+    }
     // Si la commande n'a pas pu être envoyée, on garde le panier pour que le client réessaie
     if (!sync || sync.success) setCartItems([]);
   };
@@ -107,7 +135,7 @@ export default function App() {
           <SpacesellerHub />
         </main>
       ) : (
-        <Storefront cartCount={totalCartCount} onOpenCart={() => setIsCartOpen(true)} onAddToCart={handleAddToCart} />
+        <Storefront cartCount={totalCartCount} onOpenCart={() => setIsCartOpen(true)} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
       )}
 
       {/* Modals & Drawers */}
